@@ -19,7 +19,7 @@ public class Conexion {
 
     public static void main(String[] args) {
         user = "root";
-         pass = "969696";
+         pass = "alianza96";
          url = "jdbc:mysql://localhost/impadi";
     }
 
