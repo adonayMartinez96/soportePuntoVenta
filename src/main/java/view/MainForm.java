@@ -37,6 +37,7 @@ public class MainForm extends JFrame {
     private JButton btnRegistrarPago;
     private JTextField txtNombe;
     private JLabel lblNombre;
+    private JButton agregarOrdenesButton;
 
 
     static Connection con;
@@ -170,6 +171,15 @@ public class MainForm extends JFrame {
                 registrarPago.registrarPago(ordenEncontradaSingleton);
             }
         });
+        agregarOrdenesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //System.out.println("Holazd");
+                decoderOrdersPanel panel = new decoderOrdersPanel();
+                panel.run();
+                System.out.printf("cliqueado");
+            }
+        });
     }
 
 
@@ -179,5 +189,6 @@ public class MainForm extends JFrame {
         Conexion.main(args);
         new MainForm();
     }
+
 }
 
