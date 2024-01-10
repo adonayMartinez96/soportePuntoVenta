@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class Conexion {
     public static Connection con;
 
-   public static String user = "";
+    public static String user = "";
     public static String pass = "";
     public static String url = "";
 
@@ -19,7 +19,7 @@ public class Conexion {
 
     public static void main(String[] args) {
         user = "root";
-         pass = "alianza96";
+         pass = "969696";
          url = "jdbc:mysql://localhost/impadi";
     }
 

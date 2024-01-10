@@ -44,6 +44,8 @@ public class MainForm extends JFrame {
     static PreparedStatement pst;
     boolean bandera = false;
 
+    private static String excelFile;
+
     OrdenSingleton ordenEncontradaSingleton = OrdenSingleton.getInstancia();
     Validaciones validaciones = new Validaciones();
     FiltrosBusquedas filtrosBusquedas = new FiltrosBusquedas();
@@ -141,7 +143,7 @@ public class MainForm extends JFrame {
 
         //DIRECCION SUSY
         
-        excelController.generarReporteExcel(btnGenerarExcel,model,"C:/Users/User/OneDrive/Escritorio/SOPORTE MORISTA/listas/");
+        excelController.generarReporteExcel(btnGenerarExcel,model,excelFile);
 
         btnFecha1.addMouseListener(new MouseAdapter() {
             @Override
@@ -186,6 +188,7 @@ public class MainForm extends JFrame {
 
 
     public static void main(String [] args){
+        excelFile = args[0];
         Conexion.main(args);
         new MainForm();
     }
