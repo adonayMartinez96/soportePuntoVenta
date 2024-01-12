@@ -24,6 +24,8 @@ public class decoderOrdersPanel {
     int screenWidth;
     int screenHeight;
 
+    InsertOrder insert = new InsertOrder();
+
     public decoderOrdersPanel() {
         this.orders = new ArrayList<>();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -100,8 +102,17 @@ public class decoderOrdersPanel {
     public void debug() {
         for (Decoder singleOrder : this.orders) {
             System.out.println("Nombre: " + singleOrder.getName());
-            System.out.println("Telefono: " + singleOrder.getPhone());
-            System.out.println("");
+
+
+
+            int  encontrado = insert.findCustomer(singleOrder.getPhone());
+            if(encontrado ==1 ){
+                ;
+                System.out.println("El cliente ya esta registrado: "+encontrado);
+            }else{
+                System.out.println("\n listo para insertar\n");
+                insert.insertCustomer(singleOrder.getName(),singleOrder.getPhone());
+            }
         }
     }
 

@@ -44,6 +44,7 @@ public class MainForm extends JFrame {
     static PreparedStatement pst;
     boolean bandera = false;
 
+    //variable la cual resive la direccion donde sera el output de los excel,esta ruta se obtiene del .bat
     private static String excelFile;
 
     OrdenSingleton ordenEncontradaSingleton = OrdenSingleton.getInstancia();
@@ -188,7 +189,7 @@ public class MainForm extends JFrame {
 
 
     public static void main(String [] args){
-        excelFile = args[0];
+       // excelFile = args[0];
         Conexion.main(args);
         new MainForm();
     }
