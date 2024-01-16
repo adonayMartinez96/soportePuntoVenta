@@ -107,7 +107,6 @@ public class decoderOrdersPanel {
 
             int  encontrado = insert.findCustomer(singleOrder.getPhone());
             if(encontrado ==1 ){
-                ;
                 System.out.println("El cliente ya esta registrado: "+encontrado);
             }else{
                 System.out.println("\n listo para insertar\n");

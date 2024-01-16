@@ -22,8 +22,8 @@ public class InsertOrder {
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
-                int contador = rs.getInt("contador");
-                resultado = (contador > 0) ? 1 : 0;
+                int exist = rs.getInt("contador");
+                resultado = (exist > 0) ? 1 : 0;
                 System.out.println("Resultado: " + resultado);
             }
         }    catch (SQLException e){
@@ -57,8 +57,49 @@ public class InsertOrder {
             st.setString(2,numberPhone);
 
             System.out.println("\n se inserto el cliente: " + numberPhone+"\n");
+
+            int filasAfectadas = st.executeUpdate();
+
+            int idFound = searchLastInsert(name,numberPhone);
+            System.out.println("el Id  del nuevo cliente ingresado es:" + idFound);
+
+
         }catch (SQLException e ){
             e.printStackTrace();
         }
+    }
+
+    public int searchLastInsert (String name,String numberPhone){
+        int idFound = 0;
+        String nameFound = "";
+        String phoneFound = "";
+        try {
+            //conect with database
+            Conexion con = new Conexion();
+            Connection mysql = con.conectar();
+
+            //this query search the last insert
+            String query = "select id,nombre,telefono from silverpos.clientes where telefono  = ? and nombre = ?";
+
+            PreparedStatement st = mysql.prepareStatement(query);
+
+            st.setString(1,name);
+            st.setString(2,numberPhone);
+
+            ResultSet rs  = st.executeQuery();
+
+            while(rs.next()){
+                idFound = rs.getInt("id");
+                nameFound = rs.getString("nombre");
+                phoneFound = rs.getString("telefono");
+                System.out.println("los valores encontrados del ultimo insert son los siguientes: "+idFound +" "+nameFound+" "+phoneFound);
+            }
+
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return  idFound;
     }
 }
