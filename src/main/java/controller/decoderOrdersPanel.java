@@ -9,7 +9,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+
+import Models.Customer;
+import Repositories.CustomersRepository;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -23,6 +27,8 @@ public class decoderOrdersPanel {
     List<Decoder> orders;
     int screenWidth;
     int screenHeight;
+    JPanel panel = new JPanel();
+    JTextArea textArea = new JTextArea();
 
     InsertOrder insert = new InsertOrder();
 
@@ -40,54 +46,58 @@ public class decoderOrdersPanel {
         /* frame.setSize(300, 200); */
         frame.setSize(this.screenWidth - 40, this.screenHeight - 100);
 
-        JPanel panel = new JPanel();
-
-        frame.add(panel);
-        this.placeComponents(panel);
-        frame.setContentPane(panel);
+        frame.add(this.panel);
+        this.placeComponents();
+        frame.setContentPane(this.panel);
 
         frame.setVisible(true);
         System.out.println("Cliqueado");
     }
 
-    private void placeComponents(JPanel panel) {
-        panel.setLayout(null);
+    private void placeComponents() {
+        this.panel.setLayout(null);
+        this.textArea.setLineWrap(true);
+        this.textArea.setWrapStyleWord(true);
 
-        JTextArea textArea = new JTextArea();
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-
-        JScrollPane scrollPane = new JScrollPane(textArea);
+        JScrollPane scrollPane = new JScrollPane(this.textArea);
         /* scrollPane.setBounds(10, 10, 260, 100); */
         int textAreaWidth = this.screenWidth - 80;
         int textAreaHeight = this.screenHeight - 200;
         scrollPane.setBounds(10, 10, textAreaWidth, textAreaHeight);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        panel.add(scrollPane);
+        this.panel.add(scrollPane);
 
+        this.buttonScann(textAreaHeight);
+        this.buttonSave(textAreaHeight);
+
+    }
+
+    private void buttonScann(int textAreaHeight) {
         JButton scanButton = new JButton("Scanear");
         scanButton.setBounds(20, textAreaHeight + 20, 80, 25);
         scanButton.addActionListener(e -> {
             System.out.println("se preciono el scaneo");
             // Aquí colocas la lógica que deseas ejecutar al presionar el botón "Scanear"
-            String text = textArea.getText();
+            String text = this.textArea.getText();
             // Realiza lo que necesites con el texto del JTextArea
             /* System.out.println("Texto ingresado: " + text); */
             this.decodeText(text);
 
             this.runPanelEdit(text);
         });
-        panel.add(scanButton);
+        this.panel.add(scanButton);
+    }
 
+    private void buttonSave(int textAreaHeight) {
         JButton save = new JButton("Guardar");
         save.setBounds(120, textAreaHeight + 20, 80, 25);
         save.addActionListener(e -> {
-            this.decodeText(textArea.getText());
+            this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
             this.debug();
             /* aca para guardar la data */
         });
-        panel.add(save);
+        this.panel.add(save);
     }
 
     public void decodeText(String text) {
@@ -103,15 +113,61 @@ public class decoderOrdersPanel {
         for (Decoder singleOrder : this.orders) {
             System.out.println("Nombre: " + singleOrder.getName());
 
+            int encontrado = insert.findCustomer(singleOrder.getPhone());
+            int idCliente = 0;
+            if (encontrado == 1) {
+                /*
+                 * Si el cliente ya esta registrado pues tendria que obtener el id del cliente
+                 * por numero de telefono
+                 */
+
+                CustomersRepository client = new CustomersRepository();
+
+                /*
+                 * Se espera que esta lista solamente traiga a un telefono por que se espera
+                 * que el telefono sea unico
+                 */
+                List<Customer> clients = client.getCustomersByPhone(singleOrder.getPhone());
+                Customer firstClient = clients.get(0);
+                if (clients.size() > 1) {
+                    int choice = JOptionPane.showConfirmDialog(null,
+                    "¡Atención! Se encontraron múltiples clientes con el mismo número de teléfono. ¿Desea continuar?\n"
+                            + "Solamente se obtendrá el primer cliente con este teléfono. Su nombre es: " + firstClient.getName(),
+                    "Mensaje de Advertencia", JOptionPane.YES_NO_OPTION);
+                    if (choice == JOptionPane.NO_OPTION) {
+                        System.out.println("Proceso detenido por el usuario.");
+                        return; // Puedes elegir cómo manejar la interrupción del código aquí
+                    }
+                }
+                /* 
+                 * Si es un cliente existente se ira a comparar que esa direcion es nueva o no nueva
+                 * para saber si se va a crear o no crear, el problema aca es que puede llegar a pasar
+                 * que la direcion nueva no sea igual por una sola letra o por un espacio, asi que yo creo
+                 * que hay que comparar niveles de simulitud para ver si se creara la direcion o no se creara
+                 * 
+                 * entonces, en este if pasaran
+                 * 
+                 * 1. verificar si la direcion por el decoder es "parecida" a la que esta en la tabla silverpos.clientes_direcciones_domicilio
+                 * 2. si tiene alta simulitud no se guardara si se tiene poca simulitud se guardara
+                 * 
+                 * 
+                 * esa 
+                 */
+
+                idCliente = firstClient.getId();
 
 
-            int  encontrado = insert.findCustomer(singleOrder.getPhone());
-            if(encontrado ==1 ){
-                System.out.println("El cliente ya esta registrado: "+encontrado);
-            }else{
+                System.out.println("El cliente ya esta registrado: " + encontrado);
+            } else {
                 System.out.println("\n listo para insertar\n");
-                insert.insertCustomer(singleOrder.getName(),singleOrder.getPhone());
+                /* 
+                 * Si es nuevo cliente es por que si se creara una nueva direcion
+                 */
+                insert.insertCustomer(singleOrder.getName(), singleOrder.getPhone());
             }
+
+
+            OrderController orderController = new OrderController(idCliente, singleOrder);
         }
     }
 
@@ -138,10 +194,19 @@ public class decoderOrdersPanel {
             editPanel.add(new JLabel("Ciudad:"));
             editPanel.add(cityField);
 
-            // ... Otros campos de edición
-
             JButton saveButton = new JButton("Guardar");
             saveButton.addActionListener(e -> {
+                /*
+                 * Aca editar cada una de las cosas, por el momento solamente se pueden editar
+                 * esos
+                 * tres campos (son los que se van a cambiar con el la lista de decoders que
+                 * esta
+                 * cargada en ram en ese momento)
+                 * 
+                 * arriba se tendra que poner todos los fields para que se puedan editar, en
+                 * este momento
+                 * tambien solamente estan Nombre, Telefono, Ciudad
+                 */
                 singleOrder.setData("name", nameField.getText());
                 singleOrder.setData("phone", phoneField.getText());
                 singleOrder.setData("city", cityField.getText());
