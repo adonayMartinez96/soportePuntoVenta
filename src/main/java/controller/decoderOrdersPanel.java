@@ -24,7 +24,9 @@ public class decoderOrdersPanel {
     int screenWidth;
     int screenHeight;
 
-    InsertOrder insert = new InsertOrder();
+    InsertCustomer insert = new InsertCustomer();
+
+    InsertAddress insertAddress = new InsertAddress();
 
     public decoderOrdersPanel() {
         this.orders = new ArrayList<>();
@@ -103,6 +105,9 @@ public class decoderOrdersPanel {
         for (Decoder singleOrder : this.orders) {
             System.out.println("Nombre: " + singleOrder.getName());
 
+            int idFound = 0;
+            String deparmentValue = singleOrder.getValue("Departamento");
+            String addressComplete = deparmentValue+" - "+singleOrder.getCity();
 
 
             int  encontrado = insert.findCustomer(singleOrder.getPhone());
@@ -110,8 +115,12 @@ public class decoderOrdersPanel {
                 System.out.println("El cliente ya esta registrado: "+encontrado);
             }else{
                 System.out.println("\n listo para insertar\n");
-                insert.insertCustomer(singleOrder.getName(),singleOrder.getPhone());
+                 idFound = insert.insertCustomer(singleOrder.getName(),singleOrder.getPhone());
             }
+
+            insertAddress.insertAddressClient(idFound,addressComplete,singleOrder.getAddress());
+
+
         }
     }
 
