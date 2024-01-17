@@ -30,7 +30,9 @@ public class decoderOrdersPanel {
     JPanel panel = new JPanel();
     JTextArea textArea = new JTextArea();
 
-    InsertOrder insert = new InsertOrder();
+    InsertCustomer insert = new InsertCustomer();
+
+    InsertAddress insertAddress = new InsertAddress();
 
     public decoderOrdersPanel() {
         this.orders = new ArrayList<>();
@@ -113,61 +115,77 @@ public class decoderOrdersPanel {
         for (Decoder singleOrder : this.orders) {
             System.out.println("Nombre: " + singleOrder.getName());
 
+            int idCliente = 0; // Inicializamos el idCliente fuera del bloque if
+            boolean isNew;
+            int idInsertIfClientNotExists = -1;
+
             int encontrado = insert.findCustomer(singleOrder.getPhone());
-            int idCliente = 0;
             if (encontrado == 1) {
                 /*
                  * Si el cliente ya esta registrado pues tendria que obtener el id del cliente
                  * por numero de telefono
                  */
-
                 CustomersRepository client = new CustomersRepository();
-
                 /*
                  * Se espera que esta lista solamente traiga a un telefono por que se espera
                  * que el telefono sea unico
                  */
                 List<Customer> clients = client.getCustomersByPhone(singleOrder.getPhone());
                 Customer firstClient = clients.get(0);
+
                 if (clients.size() > 1) {
                     int choice = JOptionPane.showConfirmDialog(null,
-                    "¡Atención! Se encontraron múltiples clientes con el mismo número de teléfono. ¿Desea continuar?\n"
-                            + "Solamente se obtendrá el primer cliente con este teléfono. Su nombre es: " + firstClient.getName(),
-                    "Mensaje de Advertencia", JOptionPane.YES_NO_OPTION);
+                            "¡Atención! Se encontraron múltiples clientes con el mismo número de teléfono. ¿Desea continuar?\n"
+                                    + "Solamente se obtendrá el primer cliente con este teléfono. Su nombre es: "
+                                    + firstClient.getName(),
+                            "Mensaje de Advertencia", JOptionPane.YES_NO_OPTION);
                     if (choice == JOptionPane.NO_OPTION) {
                         System.out.println("Proceso detenido por el usuario.");
                         return; // Puedes elegir cómo manejar la interrupción del código aquí
                     }
                 }
-                /* 
-                 * Si es un cliente existente se ira a comparar que esa direcion es nueva o no nueva
-                 * para saber si se va a crear o no crear, el problema aca es que puede llegar a pasar
-                 * que la direcion nueva no sea igual por una sola letra o por un espacio, asi que yo creo
-                 * que hay que comparar niveles de simulitud para ver si se creara la direcion o no se creara
+
+                /*
+                 * Si es un cliente existente se ira a comparar que esa direcion es nueva o no
+                 * nueva
+                 * para saber si se va a crear o no crear, el problema aca es que puede llegar a
+                 * pasar
+                 * que la direcion nueva no sea igual por una sola letra o por un espacio, asi
+                 * que yo creo
+                 * que hay que comparar niveles de simulitud para ver si se creara la direcion o
+                 * no se creara
                  * 
                  * entonces, en este if pasaran
                  * 
-                 * 1. verificar si la direcion por el decoder es "parecida" a la que esta en la tabla silverpos.clientes_direcciones_domicilio
-                 * 2. si tiene alta simulitud no se guardara si se tiene poca simulitud se guardara
+                 * 1. verificar si la direcion por el decoder es "parecida" a la que esta en la
+                 * tabla silverpos.clientes_direcciones_domicilio
+                 * 2. si tiene alta simulitud no se guardara si se tiene poca simulitud se
+                 * guardara
                  * 
                  * 
-                 * esa 
+                 * esa
                  */
-
                 idCliente = firstClient.getId();
-
-
-                System.out.println("El cliente ya esta registrado: " + encontrado);
+                isNew = true;
+                System.out.println("El cliente ya está registrado: " + encontrado);
             } else {
                 System.out.println("\n listo para insertar\n");
-                /* 
-                 * Si es nuevo cliente es por que si se creara una nueva direcion
-                 */
-                insert.insertCustomer(singleOrder.getName(), singleOrder.getPhone());
+                idCliente = insert.insertCustomer(singleOrder.getName(), singleOrder.getPhone());
+                idInsertIfClientNotExists = insertAddress.insertAddressClient(
+                    idCliente, 
+                    singleOrder.getAddress().get("address"), 
+                    singleOrder.getAddress().get("reference")
+                    );
+                isNew = false;
+            }
+
+            
+            OrderController orderController = new OrderController(idCliente, singleOrder, isNew);
+            if(idInsertIfClientNotExists != -1){
+                orderController.setAddressSaveId(idInsertIfClientNotExists);
             }
 
 
-            OrderController orderController = new OrderController(idCliente, singleOrder);
         }
     }
 
