@@ -61,7 +61,14 @@ public class Decoder {
     public String getValue(String key) {
         String translatedKey = translateKey(key);
         return data.getOrDefault(translatedKey.toLowerCase(),
+                null);
+
+                /* 
+                 * quite esto         return data.getOrDefault(translatedKey.toLowerCase(),
                 "No se encontró el campo " + key + ". Revisa tu ortografía y corrige.");
+
+                por que ese mensaje solamente estara en el sistema y jamas saldra al usuario
+                 */
     }
 
     public static String getInitialIntegers(String texto) {
@@ -115,8 +122,11 @@ public class Decoder {
         return this.getValue("city");
     }
 
-    public String getAddress() {
-        return this.getValue("address");
+    public Map<String, String> getAddress() {
+        Map<String, String> addressMap = new HashMap<>();
+        addressMap.put("address", this.getCity() + " " + this.getValue("departamento"));
+        addressMap.put("reference", this.getValue("referencia"));
+        return addressMap;
     }
 
     public String getPrice() {
@@ -159,7 +169,7 @@ public class Decoder {
             case "city":
                 return "ciudad";
             case "address":
-                return "direccion exacta";
+                return "direccion exacta"; /* Esto ya no va a venir en el input xd */
             case "product":
                 return "productos";
             case "price":
