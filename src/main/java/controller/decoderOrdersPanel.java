@@ -1,7 +1,6 @@
 package controller;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -28,6 +27,10 @@ public class decoderOrdersPanel {
 
     InsertAddress insertAddress = new InsertAddress();
 
+    GetTextFieldValue getTextFieldValue = new GetTextFieldValue();
+
+    List<String> productos = new ArrayList<>();
+
     public decoderOrdersPanel() {
         this.orders = new ArrayList<>();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -36,7 +39,6 @@ public class decoderOrdersPanel {
     }
 
     public void run() {
-
         JFrame frame = new JFrame("Escaner de ordenes");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         /* frame.setSize(300, 200); */
@@ -86,8 +88,14 @@ public class decoderOrdersPanel {
         save.addActionListener(e -> {
             this.decodeText(textArea.getText());
             System.out.println("se preciono el guardado");
-            this.debug();
+           // this.debug();
             /* aca para guardar la data */
+            for(Decoder singleOrder: this.orders) {
+                for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
+                    System.out.println(entry.getKey()+" - "+entry.getValue());
+                }
+            }
+
         });
         panel.add(save);
     }
@@ -115,7 +123,7 @@ public class decoderOrdersPanel {
                 System.out.println("El cliente ya esta registrado: "+encontrado);
             }else{
                 System.out.println("\n listo para insertar\n");
-                 idFound = insert.insertCustomer(singleOrder.getName(),singleOrder.getPhone());
+                idFound = insert.insertCustomer(singleOrder.getName(),singleOrder.getPhone());
             }
 
             insertAddress.insertAddressClient(idFound,addressComplete,singleOrder.getAddress());
@@ -125,6 +133,9 @@ public class decoderOrdersPanel {
     }
 
     public void runPanelEdit(String text) {
+        JTextField productField = null;
+        Map<String,Integer> productShows = new HashMap<>();
+        int countProducts = 0;
 
         for (Decoder singleOrder : this.orders) {
             JFrame editFrame = new JFrame("Editar Pedido");
@@ -147,15 +158,64 @@ public class decoderOrdersPanel {
             editPanel.add(new JLabel("Ciudad:"));
             editPanel.add(cityField);
 
-            // ... Otros campos de edición
+            String deparmentValue = singleOrder.getValue("Departamento");
+            JTextField departmentField = new JTextField(deparmentValue);
+            editPanel.add(new JLabel("Departamento:"));
+            editPanel.add(departmentField);
 
+            JTextField exactAddressField = new JTextField(singleOrder.getAddress());
+            editPanel.add(new JLabel("Direccion exacta:"));
+            editPanel.add(exactAddressField);
+
+            JTextField totalAmountField = new JTextField(singleOrder.getTotal());
+            editPanel.add(new JLabel("Total a pagar:"));
+            editPanel.add(totalAmountField);
+
+            JTextField shippingField = new JTextField(singleOrder.getShipping());
+            editPanel.add(new JLabel("Envio:"));
+            editPanel.add(shippingField);
+
+            JTextField deliveryDateField = new JTextField(singleOrder.getDeliveryDate());
+            editPanel.add(new JLabel("Fecha entrega:"));
+            editPanel.add(deliveryDateField);
+
+            Map<JTextField, JTextField> fiels =  new LinkedHashMap<>();
+
+
+            for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
+
+
+                JTextField productFieldName = new JTextField(entry.getKey());
+                editPanel.add(new JLabel("Producto:"));
+                editPanel.add(productFieldName);
+
+                JTextField productFieldCantidad = new JTextField(Integer.toString(entry.getValue()));
+                editPanel.add(new JLabel("Cantidad:"));
+                editPanel.add(productFieldCantidad);
+
+                fiels.put(productFieldName, productFieldCantidad);
+
+            }
+
+            // ... Otros campos de edición
             JButton saveButton = new JButton("Guardar");
             saveButton.addActionListener(e -> {
                 singleOrder.setData("name", nameField.getText());
                 singleOrder.setData("phone", phoneField.getText());
-                singleOrder.setData("city", cityField.getText());
+                singleOrder.setData("city",departmentField.getText()+" - " +cityField.getText());
+                singleOrder.setData("address", exactAddressField.getText());
+                singleOrder.setData("price", totalAmountField.getText());
+                singleOrder.setData("shipping", shippingField.getText());
+                singleOrder.setData("total", totalAmountField.getText());
+                singleOrder.setData("delivery date", deliveryDateField.getText());
+
+                //nameProduct -> quantity
+                for (Map.Entry<JTextField, JTextField> entry : fiels.entrySet()) {
+                    singleOrder.setData(entry.getKey().getText(), Integer.parseInt(entry.getValue().getText()));
+                }
 
                 editFrame.dispose();
+
             });
 
             editPanel.add(saveButton);
