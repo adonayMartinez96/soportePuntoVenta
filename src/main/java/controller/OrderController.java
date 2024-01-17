@@ -4,6 +4,7 @@ import java.util.List;
 
 import Models.ClientesDireccionesDomicilios;
 import Repositories.ClientesDireccionesDomiciliosRepository;
+import Repositories.OrdersRepository;
 import decoder.core.Decoder;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
@@ -13,6 +14,7 @@ public class OrderController {
     public Decoder data;
     public boolean isNew;
     public int addressSaveId;
+    public int orderIdInsert;
 
     public OrderController(int idClient, Decoder data, boolean isNew) {
         this.idClient = idClient;
@@ -21,6 +23,7 @@ public class OrderController {
         if (this.isNew) {
             this.addressSaveId = this.getIdAddressProcessed();
         }
+        this.orderIdInsert = this.insertOrder();
 
     }
 
@@ -83,6 +86,16 @@ public class OrderController {
 
     public void setAddressSaveId(int address) {
         this.addressSaveId = address;
+    }
+
+
+    private int insertOrder(){
+        return OrdersRepository.insertOrder(
+            this.data.getAddress().get("address"),
+            this.data.getAddress().get("reference"),
+            this.data.getName(),
+            this.data.getPhone()
+        );
     }
 
     @Override
