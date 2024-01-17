@@ -27,18 +27,7 @@ public class Conexion {
     }
 
     public Connection conectar() {
-        System.out.println("parametros: " + user + " " + pass + " " + url);
-        con = null;
-        try {
-            con = DriverManager.getConnection(url, user, pass);
-            System.out.println("conectado");
-            if (con != null) {
-                System.out.println("conexion establecida");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return con;
+        return Conexion.conectarS();
     }
 
     public static Connection conectarS() {
