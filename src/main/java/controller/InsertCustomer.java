@@ -55,18 +55,17 @@ public class InsertCustomer {
             st.setString(1,name);
             st.setString(2,numberPhone);
 
-            int filasAfectadas = st.executeUpdate();
+            st.executeUpdate();
 
             //get idClient the last insert in table client
-            int searchPhone = Integer.parseInt(numberPhone.trim());
-            idFound = searchLastInsert(name,searchPhone);
+            idFound = searchLastInsert(name,numberPhone);
         }catch (SQLException e ){
             e.printStackTrace();
         }
         return idFound;
     }
 
-    public int searchLastInsert (String name,int numberPhone){
+    public int searchLastInsert (String name,String numberPhone){
         int idFound = 0;
         String nameFound = "";
         String phoneFound = "";
@@ -81,7 +80,7 @@ public class InsertCustomer {
 
             PreparedStatement st = mysql.prepareStatement(query);
 
-            st.setInt(1,numberPhone);
+            st.setString(1,numberPhone);
             st.setString(2,name);
 
             ResultSet rs  = st.executeQuery();
