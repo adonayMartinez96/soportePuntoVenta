@@ -68,7 +68,7 @@ public class Decoder {
     public String getValue(String key) {
         String translatedKey = translateKey(key);
         return data.getOrDefault(translatedKey.toLowerCase(),
-                null);
+                "");
 
         /*
          * quite esto return data.getOrDefault(translatedKey.toLowerCase(),
