@@ -1,8 +1,6 @@
 package controller;
 
-
 import java.util.*;
-
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -100,13 +98,16 @@ public class decoderOrdersPanel {
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
-           // this.debug();
+            this.save();
             /* aca para guardar la data */
-            for(Decoder singleOrder: this.orders) {
-                for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
-                    System.out.println(entry.getKey()+" - "+entry.getValue());
-                }
-            }
+            /*
+             * for (Decoder singleOrder : this.orders) {
+             * for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet())
+             * {
+             * System.out.println(entry.getKey() + " - " + entry.getValue());
+             * }
+             * }
+             */
 
         });
         this.panel.add(save);
@@ -118,10 +119,9 @@ public class decoderOrdersPanel {
             List<Decoder> order = orders.getOrders();
             this.orders = order;
         }
-
     }
 
-    public void debug() {
+    public void save() {
         for (Decoder singleOrder : this.orders) {
             System.out.println("Nombre: " + singleOrder.getName());
 
@@ -198,9 +198,6 @@ public class decoderOrdersPanel {
     }
 
     public void runPanelEdit(String text) {
-        JTextField productField = null;
-        Map<String,Integer> productShows = new HashMap<>();
-        int countProducts = 0;
 
         for (Decoder singleOrder : this.orders) {
             JFrame editFrame = new JFrame("Editar Pedido");
@@ -228,8 +225,8 @@ public class decoderOrdersPanel {
             editPanel.add(new JLabel("Departamento:"));
             editPanel.add(departmentField);
 
-
-            JTextField exactAddressField = new JTextField(singleOrder.getAddress().get("address") + " - " + singleOrder.getAddress().get("reference"));
+            JTextField exactAddressField = new JTextField(
+                    singleOrder.getAddress().get("address") + " - " + singleOrder.getAddress().get("reference"));
             editPanel.add(new JLabel("Direccion exacta:"));
             editPanel.add(exactAddressField);
 
@@ -245,12 +242,9 @@ public class decoderOrdersPanel {
             editPanel.add(new JLabel("Fecha entrega:"));
             editPanel.add(deliveryDateField);
 
-            Map<JTextField, JTextField> fiels =  new LinkedHashMap<>();
-
+            Map<JTextField, JTextField> productFields = new LinkedHashMap<>();
 
             for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
-
-
                 JTextField productFieldName = new JTextField(entry.getKey());
                 editPanel.add(new JLabel("Producto:"));
                 editPanel.add(productFieldName);
@@ -258,9 +252,7 @@ public class decoderOrdersPanel {
                 JTextField productFieldCantidad = new JTextField(Integer.toString(entry.getValue()));
                 editPanel.add(new JLabel("Cantidad:"));
                 editPanel.add(productFieldCantidad);
-
-                fiels.put(productFieldName, productFieldCantidad);
-
+                productFields.put(productFieldName, productFieldCantidad);
             }
 
             // ... Otros campos de edición
@@ -279,24 +271,33 @@ public class decoderOrdersPanel {
                  */
                 singleOrder.setData("name", nameField.getText());
                 singleOrder.setData("phone", phoneField.getText());
-                singleOrder.setData("city",departmentField.getText()+" - " +cityField.getText());
+                singleOrder.setData("city", departmentField.getText() + " - " + cityField.getText());
                 singleOrder.setData("address", exactAddressField.getText());
                 singleOrder.setData("price", totalAmountField.getText());
                 singleOrder.setData("shipping", shippingField.getText());
                 singleOrder.setData("total", totalAmountField.getText());
                 singleOrder.setData("delivery date", deliveryDateField.getText());
 
-                //nameProduct -> quantity
-                for (Map.Entry<JTextField, JTextField> entry : fiels.entrySet()) {
-                    singleOrder.setData(entry.getKey().getText(), Integer.parseInt(entry.getValue().getText()));
-                }
+                // nameProduct -> quantity
+                Map<String, Integer> updatedProducts = new HashMap<>();
 
-                //nameProduct -> quantity
-                for (Map.Entry<JTextField, JTextField> entry : fiels.entrySet()) {
-                    singleOrder.setData(entry.getKey().getText(), entry.getValue().getText());
-                }
+                for (Map.Entry<JTextField, JTextField> entry : productFields.entrySet()) {
+                    String productNameMutable = entry.getKey().getText();
+                    int productQuantityMutable = Integer.parseInt(entry.getValue().getText());
 
-                
+                    for (Map.Entry<String, Integer> productEntry : singleOrder.getProducts().entrySet()) {
+                        String productNameTempInmutable = productEntry.getKey();
+                        int productQuantityTempInmutable = productEntry.getValue();
+
+                        if (!productNameMutable.equals(productNameTempInmutable)
+                                || productQuantityMutable != productQuantityTempInmutable) {
+                            updatedProducts.put(productNameMutable, productQuantityMutable);
+                        } else {
+                            updatedProducts.put(productNameTempInmutable, productQuantityTempInmutable);
+                        }
+                    }
+                }
+                singleOrder.editData(updatedProducts);
 
                 editFrame.dispose();
 
@@ -306,4 +307,5 @@ public class decoderOrdersPanel {
             editFrame.setVisible(true);
         }
     }
+
 }
