@@ -19,11 +19,13 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 
 import decoder.core.DecoderMultipleOrders;
+import decoder.core.EncoderMultipleOrders;
 import decoder.core.Decoder;
 
 public class decoderOrdersPanel {
 
     List<Decoder> orders;
+    String headerStartOrder;
     int screenWidth;
     int screenHeight;
     JPanel panel = new JPanel();
@@ -86,8 +88,8 @@ public class decoderOrdersPanel {
             // Realiza lo que necesites con el texto del JTextArea
             /* System.out.println("Texto ingresado: " + text); */
             this.decodeText(text);
-
-            this.runPanelEdit(text);
+            this.runPanelEdit();
+           
         });
         this.panel.add(scanButton);
     }
@@ -113,11 +115,16 @@ public class decoderOrdersPanel {
         this.panel.add(save);
     }
 
+    private void updateTextArea(){
+        this.textArea.setText(EncoderMultipleOrders.encodeOrders(this.orders, this.headerStartOrder));
+    }
+
     public void decodeText(String text) {
         if (this.orders.size() == 0) {
             DecoderMultipleOrders orders = new DecoderMultipleOrders(text);
             List<Decoder> order = orders.getOrders();
             this.orders = order;
+            this.headerStartOrder = orders.getHeaderStartOrder();
         }
     }
 
@@ -197,7 +204,7 @@ public class decoderOrdersPanel {
         }
     }
 
-    public void runPanelEdit(String text) {
+    public void runPanelEdit() {
 
         for (Decoder singleOrder : this.orders) {
             JFrame editFrame = new JFrame("Editar Pedido");
@@ -279,7 +286,7 @@ public class decoderOrdersPanel {
                 singleOrder.setData("delivery date", deliveryDateField.getText());
 
                 // nameProduct -> quantity
-                Map<String, Integer> updatedProducts = new HashMap<>();
+                Map<String, Integer> updatedProducts = new LinkedHashMap<>();
 
                 for (Map.Entry<JTextField, JTextField> entry : productFields.entrySet()) {
                     String productNameMutable = entry.getKey().getText();
@@ -298,7 +305,7 @@ public class decoderOrdersPanel {
                     }
                 }
                 singleOrder.editData(updatedProducts);
-
+                this.updateTextArea();
                 editFrame.dispose();
 
             });

@@ -63,7 +63,6 @@ public class OrdersRepository {
                     java.util.Date date = new java.util.Date();
                     java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String formattedDate = sdf.format(date);
-
                     result.put("date", formattedDate);
 
                     return result;
