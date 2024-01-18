@@ -53,7 +53,7 @@ public class Decoder {
             String product = Decoder.removeInitialIntegers(productRow);
             // esto significa que no se puso la cantidad de producto asi que se supondra que
             // es solamente uno
-            this.products.put(product, amount == null ? 1 : Integer.parseInt(amount));
+            this.products.put(this.translateKey(product).toLowerCase(), amount == null ? 1 : Integer.parseInt(amount));
 
         }
     }
@@ -63,12 +63,12 @@ public class Decoder {
         return data.getOrDefault(translatedKey.toLowerCase(),
                 null);
 
-                /* 
-                 * quite esto         return data.getOrDefault(translatedKey.toLowerCase(),
-                "No se encontró el campo " + key + ". Revisa tu ortografía y corrige.");
-
-                por que ese mensaje solamente estara en el sistema y jamas saldra al usuario
-                 */
+        /*
+         * quite esto return data.getOrDefault(translatedKey.toLowerCase(),
+         * "No se encontró el campo " + key + ". Revisa tu ortografía y corrige.");
+         * 
+         * por que ese mensaje solamente estara en el sistema y jamas saldra al usuario
+         */
     }
 
     public static String getInitialIntegers(String texto) {
@@ -153,10 +153,9 @@ public class Decoder {
         String translatedKey = translateKey(key);
         data.put(translatedKey.toLowerCase(), value);
     }
-    
-    public void setData(String key, int value) {
-        String translatedKey = translateKey(key);
-        products.put(translatedKey.toLowerCase(), value);
+
+    public void editData(Map<String, Integer> newMap) {
+        this.products = newMap;
     }
     
 
