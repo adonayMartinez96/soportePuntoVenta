@@ -1,7 +1,10 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -172,19 +175,16 @@ public class decoderOrdersPanel {
                 System.out.println("\n listo para insertar\n");
                 idCliente = insert.insertCustomer(singleOrder.getName(), singleOrder.getPhone());
                 idInsertIfClientNotExists = insertAddress.insertAddressClient(
-                    idCliente, 
-                    singleOrder.getAddress().get("address"), 
-                    singleOrder.getAddress().get("reference")
-                    );
+                        idCliente,
+                        singleOrder.getAddress().get("address"),
+                        singleOrder.getAddress().get("reference"));
                 isNew = false;
             }
 
-            
             OrderController orderController = new OrderController(idCliente, singleOrder, isNew);
-            if(idInsertIfClientNotExists != -1){
+            if (idInsertIfClientNotExists != -1) {
                 orderController.setAddressSaveId(idInsertIfClientNotExists);
             }
-
 
         }
     }
@@ -212,13 +212,35 @@ public class decoderOrdersPanel {
             editPanel.add(new JLabel("Ciudad:"));
             editPanel.add(cityField);
 
+            // creamos un JtextField por cada producto dentro de la orden
+
+            Map<JTextField, JTextField> fiels =  new LinkedHashMap<>();
+
+
+            for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
+
+
+                JTextField productFieldName = new JTextField(entry.getKey());
+                editPanel.add(new JLabel("Producto:"));
+                editPanel.add(productFieldName);
+
+                JTextField productFieldCantidad = new JTextField(entry.getValue());
+                editPanel.add(new JLabel("Cantidad:"));
+                editPanel.add(productFieldCantidad);
+
+                fiels.put(productFieldName, productFieldCantidad);
+
+            }
+
+
+
             JButton saveButton = new JButton("Guardar");
             saveButton.addActionListener(e -> {
                 /*
                  * Aca editar cada una de las cosas, por el momento solamente se pueden editar
                  * esos
                  * tres campos (son los que se van a cambiar con el la lista de decoders que
-                 * esta
+                 * estas
                  * cargada en ram en ese momento)
                  * 
                  * arriba se tendra que poner todos los fields para que se puedan editar, en
@@ -228,6 +250,13 @@ public class decoderOrdersPanel {
                 singleOrder.setData("name", nameField.getText());
                 singleOrder.setData("phone", phoneField.getText());
                 singleOrder.setData("city", cityField.getText());
+
+                //nameProduct -> quantity
+                for (Map.Entry<JTextField, JTextField> entry : fiels.entrySet()) {
+                    singleOrder.setData(entry.getKey().getText(), entry.getValue().getText());
+                }
+
+                
 
                 editFrame.dispose();
             });
