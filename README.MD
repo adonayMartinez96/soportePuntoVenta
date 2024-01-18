@@ -29,3 +29,20 @@ La flexibilidad de este formato permite gestionar una cantidad variable de produ
 El programa actualmente no es totalmente resistente, ya que carece de validaciones ortográficas. Por ejemplo, si el usuario escribe `referenca` en lugar de `referencia`, el programa puede experimentar problemas. Se recomienda validar que todo esté en orden antes de generar la orden.
 
 ¿Cómo validar que todo está correcto antes de crear la orden? Utiliza el botón "Scanear" para revisar y corregir el texto antes de proceder. Este recurso te ayudará a identificar y corregir posibles errores, ya sea desde otra fuente o directamente en el área de escaneo.
+
+
+
+# To-Do List
+
+- [ ] **El scanner en grande**
+- [ ] **Preview de la orden estilo ticket a un lado del scanner**
+- [ ] **Mostrar una ventana de scanner a la vez**
+- [ ] **Validar si el producto existe**
+- [ ] **Mostrar en checkbox los productos**
+- [X] **En algoritmo de porcentaje de coincidencia agregar siguientes filtros:**
+    ```sql
+    silverpos.plus p  where activo 
+    1 and length(nombre)>0 and id not in (170,171,173,180,100); 
+    ```
+- [ ] **Los comentarios y la fecha de entrega, buscar dónde deben ser insertados**
+- [ ] **Revisar qué keys son necesarias al hacer los insert, y pasar las que no sean necesarias como ""**
