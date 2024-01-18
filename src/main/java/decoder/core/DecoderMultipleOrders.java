@@ -18,6 +18,10 @@ public class DecoderMultipleOrders {
         this.decodeOrders();
     }
 
+    public String getHeaderStartOrder(){
+        return this.headerStartOrder;
+    }
+
     private void decodeOrders() {
         String[] orderBlocks = ordersString.split(headerStartOrder);
 

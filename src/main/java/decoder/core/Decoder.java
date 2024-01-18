@@ -12,7 +12,10 @@ public class Decoder {
     private double totalToPay;
     private double shipmentCost;
 
+    private String inputString;
+
     public Decoder(String input) {
+        this.inputString = input;
         this.data = new LinkedHashMap<>();
         this.products = new LinkedHashMap<>();
         decodeData(input);
@@ -20,6 +23,10 @@ public class Decoder {
         this.shipmentCost = Double.parseDouble(this.getShipping());
         this.totalAmountProducts = this.totalToPay - this.shipmentCost;
 
+    }
+
+    public String getStringData(){
+        return this.inputString;
     }
 
     private String normalizeString(String key) {
