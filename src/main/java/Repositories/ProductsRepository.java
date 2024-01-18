@@ -11,8 +11,10 @@ import java.sql.SQLException;
 
 public class ProductsRepository {
 
-    private static final String GET_PRODUCTS = "SELECT nombre, nombre_corto FROM silverpos.plus " +
-            "WHERE (nombre IS NOT NULL AND nombre != '') OR (nombre_corto IS NOT NULL AND nombre_corto != '');";
+
+
+
+    private static final String GET_PRODUCTS = "select nombre, nombre_corto from silverpos.plus p  where activo  = 1 and length(nombre)>0 and id not in (170,171,173,180,100);";
 
     public static String searchProduct(String productInput) {
         try (Connection connection = Conexion.conectarS();
@@ -56,8 +58,10 @@ public class ProductsRepository {
     }
 
     public static int getIdProductByName(String productName) {
-        String query = "SELECT id FROM silverpos.plus WHERE " +
-                       "nombre = ? OR nombre_corto = ?";
+        String query = "SELECT nombre, nombre_corto FROM silverpos.plus " +
+               "WHERE activo = 1 AND LENGTH(nombre) > 0 AND id NOT IN (170, 171, 173, 180, 100) " +
+               "AND (nombre = ? OR nombre_corto = ?)";
+
     
         try (Connection connection = Conexion.conectarS();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -82,7 +86,9 @@ public class ProductsRepository {
 
     public static String getProductNameById(int id) {
         String query = "SELECT nombre, nombre_corto FROM silverpos.plus " +
-                       "WHERE id = ? AND (nombre IS NOT NULL AND nombre != '' OR nombre_corto IS NOT NULL AND nombre_corto != '')";
+        "WHERE activo = 1 AND LENGTH(nombre) > 0 AND id NOT IN (170, 171, 173, 180, 100) " +
+        "AND id = ? AND (nombre IS NOT NULL AND nombre != '' OR nombre_corto IS NOT NULL AND nombre_corto != '')";
+
     
         try (Connection connection = Conexion.conectarS();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
