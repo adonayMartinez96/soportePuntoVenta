@@ -50,6 +50,13 @@
             <version>1.4</version> <!-- Reemplaza con la versión más reciente -->
         </dependency>
 
+        <dependency>
+    <groupId>com.google.guava</groupId>
+    <artifactId>guava</artifactId>
+    <version>30.1-jre</version> <!-- Ajusta la versión según la más reciente disponible -->
+</dependency>
+
+
 
     <dependency>
     <groupId>org.apache.commons</groupId>
