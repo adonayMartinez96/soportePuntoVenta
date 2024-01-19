@@ -36,7 +36,7 @@ El programa actualmente no es totalmente resistente, ya que carece de validacion
 
 - [ ] **El scanner en grande**
 - [ ] **Preview de la orden estilo ticket a un lado del scanner**
-- [ ] **Mostrar una ventana de scanner a la vez**
+- [X] **Mostrar una ventana de scanner a la vez**
 - [X] **Validar si el producto existe**
 - [X] **Mostrar en JComboBox los productos**
 - [X] **En algoritmo de porcentaje de coincidencia agregar siguientes filtros:**

@@ -20,6 +20,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import decoder.core.DecoderMultipleOrders;
 import decoder.core.EncoderMultipleOrders;
@@ -208,145 +210,165 @@ public class decoderOrdersPanel {
     }
 
     public void runPanelEdit() {
+        int totalOrders = this.orders.size();
+        runPanelEditRecursive(0, totalOrders);
+    }
 
-        for (Decoder singleOrder : this.orders) {
-            JFrame editFrame = new JFrame("Editar Pedido");
-            editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            editFrame.setSize(400, 300);
+    private void runPanelEditRecursive(int currentIndex, int totalOrders) {
+        if (currentIndex >= totalOrders) {
+            return; // Kill al proceso si ya termino de leer todos las orders
+        }
 
-            JPanel editPanel = new JPanel();
-            editFrame.add(editPanel);
-            editPanel.setLayout(new GridLayout(0, 2));
+        Decoder singleOrder = this.orders.get(currentIndex);
+        JFrame editFrame = new JFrame(
+                "Scaneando pedido " + (currentIndex + 1) + " de " + totalOrders + " (" + singleOrder.getName() + ")");
+        editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        editFrame.setSize(400, 300);
 
-            JTextField nameField = new JTextField(singleOrder.getName());
-            editPanel.add(new JLabel("Nombre:"));
-            editPanel.add(nameField);
+        JPanel editPanel = new JPanel();
+        editFrame.add(editPanel);
+        editPanel.setLayout(new GridLayout(0, 2));
 
-            JTextField phoneField = new JTextField(singleOrder.getPhone());
-            editPanel.add(new JLabel("Teléfono:"));
-            editPanel.add(phoneField);
+        JTextField nameField = new JTextField(singleOrder.getName());
+        editPanel.add(new JLabel("Nombre:"));
+        editPanel.add(nameField);
 
-            JTextField cityField = new JTextField(singleOrder.getCity());
-            editPanel.add(new JLabel("Ciudad:"));
-            editPanel.add(cityField);
+        JTextField phoneField = new JTextField(singleOrder.getPhone());
+        editPanel.add(new JLabel("Teléfono:"));
+        editPanel.add(phoneField);
 
-            String deparmentValue = singleOrder.getValue("Departamento");
-            JTextField departmentField = new JTextField(deparmentValue);
-            editPanel.add(new JLabel("Departamento:"));
-            editPanel.add(departmentField);
+        JTextField cityField = new JTextField(singleOrder.getCity());
+        editPanel.add(new JLabel("Ciudad:"));
+        editPanel.add(cityField);
 
-            JTextField exactAddressField = new JTextField(
-                    singleOrder.getAddress().get("address") + " - " + singleOrder.getAddress().get("reference"));
-            editPanel.add(new JLabel("Direccion exacta:"));
-            editPanel.add(exactAddressField);
+        String deparmentValue = singleOrder.getValue("Departamento");
+        JTextField departmentField = new JTextField(deparmentValue);
+        editPanel.add(new JLabel("Departamento:"));
+        editPanel.add(departmentField);
 
-            JTextField totalAmountField = new JTextField(singleOrder.getTotal());
-            editPanel.add(new JLabel("Total a pagar:"));
-            editPanel.add(totalAmountField);
+        JTextField exactAddressField = new JTextField(
+                singleOrder.getAddress().get("address") + " - " + singleOrder.getAddress().get("reference"));
+        editPanel.add(new JLabel("Direccion exacta:"));
+        editPanel.add(exactAddressField);
 
-            JTextField shippingField = new JTextField(singleOrder.getShipping());
-            editPanel.add(new JLabel("Envio:"));
-            editPanel.add(shippingField);
+        JTextField totalAmountField = new JTextField(singleOrder.getTotal());
+        editPanel.add(new JLabel("Total a pagar:"));
+        editPanel.add(totalAmountField);
 
-            JTextField deliveryDateField = new JTextField(singleOrder.getDeliveryDate());
-            editPanel.add(new JLabel("Fecha entrega:"));
-            editPanel.add(deliveryDateField);
+        JTextField shippingField = new JTextField(singleOrder.getShipping());
+        editPanel.add(new JLabel("Envio:"));
+        editPanel.add(shippingField);
 
-            Map<JComboBox<String>, JTextField> productFields = new LinkedHashMap<>();
+        JTextField deliveryDateField = new JTextField(singleOrder.getDeliveryDate());
+        editPanel.add(new JLabel("Fecha entrega:"));
+        editPanel.add(deliveryDateField);
 
-            for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
-                String productNameInput = entry.getKey();
-                int productQuantityInput = entry.getValue();
+        Map<JComboBox<String>, JTextField> productFields = new LinkedHashMap<>();
 
-                JComboBox<String> productComboBox = createProductComboBox(productNameInput);
-                JTextField productFieldCantidad = new JTextField(Integer.toString(productQuantityInput));
-                editPanel.add(new JLabel("Producto:"));
-                editPanel.add(productComboBox);
-                editPanel.add(new JLabel("Cantidad:"));
-                editPanel.add(productFieldCantidad);
-                productFields.put(productComboBox, productFieldCantidad);
-            }
+        for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
+            String productNameInput = entry.getKey();
+            int productQuantityInput = entry.getValue();
 
-            // ... Otros campos de edición
-            JButton saveButton = new JButton("Guardar");
-            saveButton.addActionListener(e -> {
-                /*
-                 * Aca editar cada una de las cosas, por el momento solamente se pueden editar
-                 * esos
-                 * tres campos (son los que se van a cambiar con el la lista de decoders que
-                 * estas
-                 * cargada en ram en ese momento)
-                 * 
-                 * arriba se tendra que poner todos los fields para que se puedan editar, en
-                 * este momento
-                 * tambien solamente estan Nombre, Telefono, Ciudad
-                 */
-                singleOrder.setData("name", nameField.getText());
-                singleOrder.setData("phone", phoneField.getText());
-                singleOrder.setData("city", departmentField.getText() + " - " + cityField.getText());
-                singleOrder.setData("address", exactAddressField.getText());
-                singleOrder.setData("price", totalAmountField.getText());
-                singleOrder.setData("shipping", shippingField.getText());
-                singleOrder.setData("total", totalAmountField.getText());
-                singleOrder.setData("delivery date", deliveryDateField.getText());
+            JComboBox<String> productComboBox = createProductComboBox(productNameInput);
+            JTextField productFieldCantidad = new JTextField(Integer.toString(productQuantityInput));
+            editPanel.add(new JLabel("Producto:"));
+            editPanel.add(productComboBox);
+            editPanel.add(new JLabel("Cantidad:"));
+            editPanel.add(productFieldCantidad);
+            productFields.put(productComboBox, productFieldCantidad);
+        }
 
-                // nameProduct -> quantity
-                Map<String, Integer> updatedProducts = new LinkedHashMap<>();
+        // ... Otros campos de edición
+        JButton saveButton = new JButton("Guardar");
+        saveButton.addActionListener(e -> {
+            /*
+             * Aca editar cada una de las cosas, por el momento solamente se pueden editar
+             * esos
+             * tres campos (son los que se van a cambiar con el la lista de decoders que
+             * estas
+             * cargada en ram en ese momento)
+             * 
+             * arriba se tendra que poner todos los fields para que se puedan editar, en
+             * este momento
+             * tambien solamente estan Nombre, Telefono, Ciudad
+             */
+            singleOrder.setData("name", nameField.getText());
+            singleOrder.setData("phone", phoneField.getText());
+            singleOrder.setData("city", departmentField.getText() + " - " + cityField.getText());
+            singleOrder.setData("address", exactAddressField.getText());
+            singleOrder.setData("price", totalAmountField.getText());
+            singleOrder.setData("shipping", shippingField.getText());
+            singleOrder.setData("total", totalAmountField.getText());
+            singleOrder.setData("delivery date", deliveryDateField.getText());
 
-                for (Map.Entry<JComboBox<String>, JTextField> entry : productFields.entrySet()) {
-                    String productNameMutable = (String) entry.getKey().getSelectedItem(); //esto para obtener el producto selecionado xd
-                    int productQuantityMutable = Integer.parseInt(entry.getValue().getText());
-                
-                    for (Map.Entry<String, Integer> productEntry : singleOrder.getProducts().entrySet()) {
-                        String productNameTempInmutable = productEntry.getKey();
-                        int productQuantityTempInmutable = productEntry.getValue();
-                
-                        if (productNameMutable.equals(productNameTempInmutable)) {
-                            // El nombre del producto coincide, verifica si hay cambios en la cantidad
-                            if (productQuantityMutable != productQuantityTempInmutable) {
-                                updatedProducts.put(productNameMutable, productQuantityMutable);
-                            }
-                        } else {
-                            // El nombre del producto no coincide, se mantendra el nombre original
-                            updatedProducts.put(productNameTempInmutable, productQuantityTempInmutable);
+            // nameProduct -> quantity
+            Map<String, Integer> updatedProducts = new LinkedHashMap<>();
+
+            for (Map.Entry<JComboBox<String>, JTextField> entry : productFields.entrySet()) {
+                String productNameMutable = (String) entry.getKey().getSelectedItem(); // esto para obtener el
+                                                                                       // producto selecionado xd
+                int productQuantityMutable = Integer.parseInt(entry.getValue().getText());
+
+                for (Map.Entry<String, Integer> productEntry : singleOrder.getProducts().entrySet()) {
+                    String productNameTempInmutable = productEntry.getKey();
+                    int productQuantityTempInmutable = productEntry.getValue();
+
+                    if (productNameMutable.equals(productNameTempInmutable)) {
+                        // El nombre del producto coincide, verifica si hay cambios en la cantidad
+                        if (productQuantityMutable != productQuantityTempInmutable) {
+                            updatedProducts.put(productNameMutable, productQuantityMutable);
                         }
+                    } else {
+                        // El nombre del producto no coincide, se mantendra el nombre original
+                        updatedProducts.put(productNameTempInmutable, productQuantityTempInmutable);
                     }
                 }
-                
-                singleOrder.editData(updatedProducts);
-                
-                this.updateTextArea();
+            }
+
+            singleOrder.editData(updatedProducts);
+
+            this.updateTextArea(); // ver esa cosa que esta haciendo bugs :c
+            editFrame.dispose();
+
+            runPanelEditRecursive(currentIndex + 1, totalOrders);
+
+        });
+
+        editPanel.add(saveButton);
+
+        editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        editFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
                 editFrame.dispose();
+                runPanelEditRecursive(currentIndex + 1, totalOrders);
+                //handleWindowClosing(singleOrder, currentIndex, totalOrders, editFrame);
+            }
+        });
 
-            });
+        editFrame.setVisible(true);
 
-            editPanel.add(saveButton);
-            editFrame.setVisible(true);
-        }
     }
 
     private static JComboBox<String> createProductComboBox(String initialProduct) {
         List<String> availableProducts = ProductsRepository.getAvailableProducts();
-    
-        // Agregar una opción adicional si no se encontró el producto
+
         String bestMatch = ProductsRepository.searchProduct(initialProduct);
         if (bestMatch.isEmpty()) {
             availableProducts.add("No se encontró el producto, elige uno");
         }
-    
+
         JComboBox<String> productComboBox = new JComboBox<>(availableProducts.toArray(new String[0]));
-    
-        // Seleccionar el producto que más similitud tiene
+
         int selectedIndex = availableProducts.indexOf(bestMatch);
         if (selectedIndex != -1) {
             productComboBox.setSelectedIndex(selectedIndex);
         } else {
-            // Si no se encontró una coincidencia, seleccionar la opción adicional y cambiar el color
             productComboBox.setSelectedItem("No se encontró el producto, elige uno");
             productComboBox.setForeground(Color.RED);
         }
-    
+
         return productComboBox;
     }
-    
+
 }

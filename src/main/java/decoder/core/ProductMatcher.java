@@ -32,7 +32,7 @@ public class ProductMatcher {
         double jaroWinklerSimilarity = jaroWinkler.apply(productName, input);
         double jaccardSimilarity = calculateJaccardSimilarity(inputTokens, productTokens);
 
-        // Ponderación de las similitudes (ajusta según sea necesario)
+        // ponderacion de las similitudes (se puede ajustar si es necesario)
         double weightedSimilarity = 0.7 * jaroWinklerSimilarity + 0.3 * jaccardSimilarity;
 
         return weightedSimilarity;
