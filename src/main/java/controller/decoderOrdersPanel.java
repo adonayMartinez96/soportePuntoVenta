@@ -3,6 +3,7 @@ package controller;
 import java.util.*;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -13,10 +14,12 @@ import javax.swing.JTextField;
 
 import Models.Customer;
 import Repositories.CustomersRepository;
+import Repositories.ProductsRepository;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.Color;
 
 import decoder.core.DecoderMultipleOrders;
 import decoder.core.EncoderMultipleOrders;
@@ -89,7 +92,7 @@ public class decoderOrdersPanel {
             /* System.out.println("Texto ingresado: " + text); */
             this.decodeText(text);
             this.runPanelEdit();
-           
+
         });
         this.panel.add(scanButton);
     }
@@ -115,7 +118,7 @@ public class decoderOrdersPanel {
         this.panel.add(save);
     }
 
-    private void updateTextArea(){
+    private void updateTextArea() {
         this.textArea.setText(EncoderMultipleOrders.encodeOrders(this.orders, this.headerStartOrder));
     }
 
@@ -249,17 +252,19 @@ public class decoderOrdersPanel {
             editPanel.add(new JLabel("Fecha entrega:"));
             editPanel.add(deliveryDateField);
 
-            Map<JTextField, JTextField> productFields = new LinkedHashMap<>();
+            Map<JComboBox<String>, JTextField> productFields = new LinkedHashMap<>();
 
             for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
-                JTextField productFieldName = new JTextField(entry.getKey());
-                editPanel.add(new JLabel("Producto:"));
-                editPanel.add(productFieldName);
+                String productNameInput = entry.getKey();
+                int productQuantityInput = entry.getValue();
 
-                JTextField productFieldCantidad = new JTextField(Integer.toString(entry.getValue()));
+                JComboBox<String> productComboBox = createProductComboBox(productNameInput);
+                JTextField productFieldCantidad = new JTextField(Integer.toString(productQuantityInput));
+                editPanel.add(new JLabel("Producto:"));
+                editPanel.add(productComboBox);
                 editPanel.add(new JLabel("Cantidad:"));
                 editPanel.add(productFieldCantidad);
-                productFields.put(productFieldName, productFieldCantidad);
+                productFields.put(productComboBox, productFieldCantidad);
             }
 
             // ... Otros campos de edición
@@ -288,23 +293,28 @@ public class decoderOrdersPanel {
                 // nameProduct -> quantity
                 Map<String, Integer> updatedProducts = new LinkedHashMap<>();
 
-                for (Map.Entry<JTextField, JTextField> entry : productFields.entrySet()) {
-                    String productNameMutable = entry.getKey().getText();
+                for (Map.Entry<JComboBox<String>, JTextField> entry : productFields.entrySet()) {
+                    String productNameMutable = (String) entry.getKey().getSelectedItem(); //esto para obtener el producto selecionado xd
                     int productQuantityMutable = Integer.parseInt(entry.getValue().getText());
-
+                
                     for (Map.Entry<String, Integer> productEntry : singleOrder.getProducts().entrySet()) {
                         String productNameTempInmutable = productEntry.getKey();
                         int productQuantityTempInmutable = productEntry.getValue();
-
-                        if (!productNameMutable.equals(productNameTempInmutable)
-                                || productQuantityMutable != productQuantityTempInmutable) {
-                            updatedProducts.put(productNameMutable, productQuantityMutable);
+                
+                        if (productNameMutable.equals(productNameTempInmutable)) {
+                            // El nombre del producto coincide, verifica si hay cambios en la cantidad
+                            if (productQuantityMutable != productQuantityTempInmutable) {
+                                updatedProducts.put(productNameMutable, productQuantityMutable);
+                            }
                         } else {
+                            // El nombre del producto no coincide, se mantendra el nombre original
                             updatedProducts.put(productNameTempInmutable, productQuantityTempInmutable);
                         }
                     }
                 }
+                
                 singleOrder.editData(updatedProducts);
+                
                 this.updateTextArea();
                 editFrame.dispose();
 
@@ -315,4 +325,28 @@ public class decoderOrdersPanel {
         }
     }
 
+    private static JComboBox<String> createProductComboBox(String initialProduct) {
+        List<String> availableProducts = ProductsRepository.getAvailableProducts();
+    
+        // Agregar una opción adicional si no se encontró el producto
+        String bestMatch = ProductsRepository.searchProduct(initialProduct);
+        if (bestMatch.isEmpty()) {
+            availableProducts.add("No se encontró el producto, elige uno");
+        }
+    
+        JComboBox<String> productComboBox = new JComboBox<>(availableProducts.toArray(new String[0]));
+    
+        // Seleccionar el producto que más similitud tiene
+        int selectedIndex = availableProducts.indexOf(bestMatch);
+        if (selectedIndex != -1) {
+            productComboBox.setSelectedIndex(selectedIndex);
+        } else {
+            // Si no se encontró una coincidencia, seleccionar la opción adicional y cambiar el color
+            productComboBox.setSelectedItem("No se encontró el producto, elige uno");
+            productComboBox.setForeground(Color.RED);
+        }
+    
+        return productComboBox;
+    }
+    
 }
