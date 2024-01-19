@@ -33,6 +33,7 @@ public class decoderOrdersPanel {
     String headerStartOrder;
     int screenWidth;
     int screenHeight;
+   
     JPanel panel = new JPanel();
     JTextArea textArea = new JTextArea();
 
@@ -44,8 +45,14 @@ public class decoderOrdersPanel {
 
     List<String> productos = new ArrayList<>();
 
+
+    //errors config
+    Boolean error = false;
+    List<String> errorsList;
+
     public decoderOrdersPanel() {
         this.orders = new ArrayList<>();
+        this.errorsList = new ArrayList<>();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.screenWidth = (int) screenSize.getWidth();
         this.screenHeight = (int) screenSize.getHeight();
@@ -78,14 +85,18 @@ public class decoderOrdersPanel {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         this.panel.add(scrollPane);
 
-        this.buttonScann(textAreaHeight);
-        this.buttonSave(textAreaHeight);
+        this.buttonScann(textAreaHeight, !this.error);
+        this.buttonSave(textAreaHeight, !this.error);
+        if(this.error){
+            this.printErrors(this.errorsList);
+        }
 
     }
 
-    private void buttonScann(int textAreaHeight) {
+    private void buttonScann(int textAreaHeight, boolean enable) {
         JButton scanButton = new JButton("Scanear");
         scanButton.setBounds(20, textAreaHeight + 20, 80, 25);
+        scanButton.setEnabled(enable);
         scanButton.addActionListener(e -> {
             System.out.println("se preciono el scaneo");
             // Aquí colocas la lógica que deseas ejecutar al presionar el botón "Scanear"
@@ -93,29 +104,25 @@ public class decoderOrdersPanel {
             // Realiza lo que necesites con el texto del JTextArea
             /* System.out.println("Texto ingresado: " + text); */
             this.decodeText(text);
-            this.runPanelEdit();
+            if(!this.error){
+                this.runPanelEdit();
+            }
+            
 
         });
         this.panel.add(scanButton);
     }
 
-    private void buttonSave(int textAreaHeight) {
+    private void buttonSave(int textAreaHeight, boolean enable) {
         JButton save = new JButton("Guardar");
         save.setBounds(120, textAreaHeight + 20, 80, 25);
+        save.setEnabled(enable);
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
-            this.save();
-            /* aca para guardar la data */
-            /*
-             * for (Decoder singleOrder : this.orders) {
-             * for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet())
-             * {
-             * System.out.println(entry.getKey() + " - " + entry.getValue());
-             * }
-             * }
-             */
-
+            if(!this.error){
+                this.save();
+            }
         });
         this.panel.add(save);
     }
@@ -127,9 +134,34 @@ public class decoderOrdersPanel {
     public void decodeText(String text) {
         if (this.orders.size() == 0) {
             DecoderMultipleOrders orders = new DecoderMultipleOrders(text);
+            orders.addRequiredKey("Teléfono");
+            orders.addRequiredKey("Nombre");
+            orders.addRequiredKey("Ciudad");
+            orders.addRequiredKey("Departamento");
+            orders.addRequiredKey("Total a pagar");
+            orders.addRequiredKey("Envío");
+            orders.addRequiredKey("Fecha de entrega");
+            orders.decode();
             List<Decoder> order = orders.getOrders();
             this.orders = order;
             this.headerStartOrder = orders.getHeaderStartOrder();
+            
+
+            //este codigo solamente se ejecutara en el caso que haya errores
+           
+            this.error = orders.existError();
+            this.printErrors(orders.getErrors());
+        }
+    }
+
+
+    public void printErrors(List<String> errors){
+        StringBuilder errorMessage = new StringBuilder("Errores:\n");
+        for (String error : errors) {
+            errorMessage.append("- ").append(error).append("\n");
+        }
+        if(this.error){
+            JOptionPane.showMessageDialog(null, errorMessage.toString(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
