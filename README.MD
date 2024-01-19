@@ -45,5 +45,5 @@ El programa actualmente no es totalmente resistente, ya que carece de validacion
     1 and length(nombre)>0 and id not in (170,171,173,180,100); 
     ```
 - [ ] **Los comentarios y la fecha de entrega, buscar dónde deben ser insertados**
-- [ ] **Revisar qué keys son necesarias al hacer los insert, y pasar las que no sean necesarias como ""**
+- [X] **Revisar qué keys son necesarias al hacer los insert, y pasar las que no sean necesarias como ""**
 - [ ] **Reparar bug en el update text area ya que cada vez que se modifica, la direcion parece duplicarse**
