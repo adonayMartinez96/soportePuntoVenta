@@ -37,8 +37,8 @@ El programa actualmente no es totalmente resistente, ya que carece de validacion
 - [ ] **El scanner en grande**
 - [ ] **Preview de la orden estilo ticket a un lado del scanner**
 - [ ] **Mostrar una ventana de scanner a la vez**
-- [ ] **Validar si el producto existe**
-- [ ] **Mostrar en checkbox los productos**
+- [X] **Validar si el producto existe**
+- [X] **Mostrar en JComboBox los productos**
 - [X] **En algoritmo de porcentaje de coincidencia agregar siguientes filtros:**
     ```sql
     silverpos.plus p  where activo 
@@ -46,3 +46,4 @@ El programa actualmente no es totalmente resistente, ya que carece de validacion
     ```
 - [ ] **Los comentarios y la fecha de entrega, buscar dónde deben ser insertados**
 - [ ] **Revisar qué keys son necesarias al hacer los insert, y pasar las que no sean necesarias como ""**
+- [ ] **Reparar bug en el update text area ya que cada vez que se modifica, la direcion parece duplicarse**
