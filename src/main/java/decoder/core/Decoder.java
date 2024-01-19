@@ -29,7 +29,7 @@ public class Decoder {
         return this.inputString;
     }
 
-    private String normalizeString(String key) {
+    public String normalizeString(String key) {
         return Normalizer.normalize(key, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "").toLowerCase();
     }
