@@ -47,6 +47,6 @@ El programa actualmente no es totalmente resistente, ya que carece de validacion
 - [ ] **Los comentarios y la fecha de entrega, buscar dónde deben ser insertados**
 - [X] **Revisar qué keys son necesarias al hacer los insert, y pasar las que no sean necesarias como ""**
 - [ ] **Reparar bug en el update text area ya que cada vez que se modifica, la direcion parece duplicarse**
--[] **multiplicar cada producto de la orden y el envio por 0.13, este valor se insertara en la tabla: ventaDetaPlus en el campo TAX1 de cada producto correspondiente**
--[] **preparar query para insertar la linea de mensaje que se inserta por cada orden con su MENSAJE y FECHA_ENTREGA concatenado, esto ira al campo MENSAJE de la tabla: ventaDetaPlus**
--[] **Agregar en scanner campo precio precio producto,agregar campo precio envio y agregar campo total pagar el cual sera la sumatoria de los 2 anteriores**
+- [ ] **multiplicar cada producto de la orden y el envio por 0.13, este valor se insertara en la tabla: ventaDetaPlus en el campo TAX1 de cada producto correspondiente**
+- [ ] **preparar query para insertar la linea de mensaje que se inserta por cada orden con su MENSAJE y FECHA_ENTREGA concatenado, esto ira al campo MENSAJE de la tabla: ventaDetaPlus**
+- [ ] **Agregar en scanner campo precio precio producto,agregar campo precio envio y agregar campo total pagar el cual sera la sumatoria de los 2 anteriores**
