@@ -33,7 +33,7 @@ public class decoderOrdersPanel {
     String headerStartOrder;
     int screenWidth;
     int screenHeight;
-   
+
     JPanel panel = new JPanel();
     JTextArea textArea = new JTextArea();
 
@@ -45,10 +45,28 @@ public class decoderOrdersPanel {
 
     List<String> productos = new ArrayList<>();
 
-
-    //errors config
+    // errors config
     Boolean error = false;
     List<String> errorsList;
+
+
+    //todo el panel
+    JFrame frame;
+
+    /*
+     * en esta funcion se definen los key que son requeridos, si el decoder
+     * no encuentra uno de estos keys dara un error, se pueden empezar a definir
+     * mas keys desde aca
+     */
+    private void requiredKeys(DecoderMultipleOrders orders) {
+        orders.addRequiredKey("Teléfono");
+        orders.addRequiredKey("Nombre");
+        orders.addRequiredKey("Ciudad");
+        orders.addRequiredKey("Departamento");
+        orders.addRequiredKey("Total a pagar");
+        orders.addRequiredKey("Envío");
+        orders.addRequiredKey("Fecha de entrega");
+    }
 
     public decoderOrdersPanel() {
         this.orders = new ArrayList<>();
@@ -56,26 +74,27 @@ public class decoderOrdersPanel {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.screenWidth = (int) screenSize.getWidth();
         this.screenHeight = (int) screenSize.getHeight();
+        this.frame = new JFrame("Escaner de ordenes");
     }
 
     public void run() {
-        JFrame frame = new JFrame("Escaner de ordenes");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         /* frame.setSize(300, 200); */
-        frame.setSize(this.screenWidth - 40, this.screenHeight - 100);
+        this.frame.setSize(this.screenWidth - 40, this.screenHeight - 100);
 
-        frame.add(this.panel);
-        this.placeComponents();
-        frame.setContentPane(this.panel);
+        this.frame.add(this.panel);
+        this.placeComponents(""); //vacio por defecto
+        this.frame.setContentPane(this.panel);
 
-        frame.setVisible(true);
+        this.frame.setVisible(true);
         System.out.println("Cliqueado");
     }
 
-    private void placeComponents() {
+    private void placeComponents(String textArea) {
         this.panel.setLayout(null);
         this.textArea.setLineWrap(true);
         this.textArea.setWrapStyleWord(true);
+        this.textArea.setText(textArea);
 
         JScrollPane scrollPane = new JScrollPane(this.textArea);
         /* scrollPane.setBounds(10, 10, 260, 100); */
@@ -87,11 +106,10 @@ public class decoderOrdersPanel {
 
         this.buttonScann(textAreaHeight, !this.error);
         this.buttonSave(textAreaHeight, !this.error);
-        if(this.error){
-            this.printErrors(this.errorsList);
-        }
 
     }
+
+
 
     private void buttonScann(int textAreaHeight, boolean enable) {
         JButton scanButton = new JButton("Scanear");
@@ -104,10 +122,9 @@ public class decoderOrdersPanel {
             // Realiza lo que necesites con el texto del JTextArea
             /* System.out.println("Texto ingresado: " + text); */
             this.decodeText(text);
-            if(!this.error){
+            if (!this.error) {
                 this.runPanelEdit();
             }
-            
 
         });
         this.panel.add(scanButton);
@@ -120,7 +137,7 @@ public class decoderOrdersPanel {
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
-            if(!this.error){
+            if (!this.error) {
                 this.save();
             }
         });
@@ -134,34 +151,25 @@ public class decoderOrdersPanel {
     public void decodeText(String text) {
         if (this.orders.size() == 0) {
             DecoderMultipleOrders orders = new DecoderMultipleOrders(text);
-            orders.addRequiredKey("Teléfono");
-            orders.addRequiredKey("Nombre");
-            orders.addRequiredKey("Ciudad");
-            orders.addRequiredKey("Departamento");
-            orders.addRequiredKey("Total a pagar");
-            orders.addRequiredKey("Envío");
-            orders.addRequiredKey("Fecha de entrega");
+            this.requiredKeys(orders);
             orders.decode();
             List<Decoder> order = orders.getOrders();
             this.orders = order;
             this.headerStartOrder = orders.getHeaderStartOrder();
-            
 
-            //este codigo solamente se ejecutara en el caso que haya errores
-           
+            // este codigo solamente se ejecutara en el caso que haya errores
+
             this.error = orders.existError();
             this.printErrors(orders.getErrors());
+            this.placeComponents(this.textArea.getText());
         }
     }
 
-
-    public void printErrors(List<String> errors){
-        StringBuilder errorMessage = new StringBuilder("Errores:\n");
-        for (String error : errors) {
-            errorMessage.append("- ").append(error).append("\n");
-        }
-        if(this.error){
-            JOptionPane.showMessageDialog(null, errorMessage.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+    public void printErrors(List<String> errors) {
+        if (!errors.isEmpty()) {
+            String errorMessage = "Errores:\n" + String.join("\n", errors);
+            JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            this.frame.dispose(); //cerrar la ventana
         }
     }
 
@@ -173,8 +181,7 @@ public class decoderOrdersPanel {
             boolean isNew;
             int idInsertIfClientNotExists = -1;
 
-            int encontrado = insert.findCustomer(singleOrder.getPhone());
-            if (encontrado == 1) {
+            if (insert.findCustomer(singleOrder.getPhone())) {
                 /*
                  * Si el cliente ya esta registrado pues tendria que obtener el id del cliente
                  * por numero de telefono
@@ -221,7 +228,6 @@ public class decoderOrdersPanel {
                  */
                 idCliente = firstClient.getId();
                 isNew = true;
-                System.out.println("El cliente ya está registrado: " + encontrado);
             } else {
                 System.out.println("\n listo para insertar\n");
                 idCliente = insert.insertCustomer(singleOrder.getName(), singleOrder.getPhone());
@@ -278,8 +284,7 @@ public class decoderOrdersPanel {
         editPanel.add(new JLabel("Departamento:"));
         editPanel.add(departmentField);
 
-        JTextField exactAddressField = new JTextField(
-                singleOrder.getAddress().get("address") + " - " + singleOrder.getAddress().get("reference"));
+        JTextField exactAddressField = new JTextField(singleOrder.getAllAddress());
         editPanel.add(new JLabel("Direccion exacta:"));
         editPanel.add(exactAddressField);
 
@@ -333,7 +338,12 @@ public class decoderOrdersPanel {
             singleOrder.setData("total", totalAmountField.getText());
             singleOrder.setData("delivery date", deliveryDateField.getText());
 
-            // nameProduct -> quantity
+            /*
+             * Este codigo que esta aca sirve para detectar mutabilidad en los datos del
+             * formulario
+             * en la parte de productos, el map esta de esta manera:
+             * nameProduct -> quantity
+             */
             Map<String, Integer> updatedProducts = new LinkedHashMap<>();
 
             for (Map.Entry<JComboBox<String>, JTextField> entry : productFields.entrySet()) {
@@ -374,7 +384,7 @@ public class decoderOrdersPanel {
             public void windowClosing(WindowEvent e) {
                 editFrame.dispose();
                 runPanelEditRecursive(currentIndex + 1, totalOrders);
-                //handleWindowClosing(singleOrder, currentIndex, totalOrders, editFrame);
+                // handleWindowClosing(singleOrder, currentIndex, totalOrders, editFrame);
             }
         });
 
