@@ -136,6 +136,10 @@ public class Decoder {
         return addressMap;
     }
 
+    public String getAllAddress(){
+        return this.getAddress().get("address") + " - " + this.getAddress().get("reference");
+    }
+
     public String getPrice() {
         return this.getValue("price");
     }
