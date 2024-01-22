@@ -6,29 +6,32 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class InsertCustomer {
-    public int findCustomer(String phoneNumber) {
-        int resultado = 0;
 
-        //In this query, i do find a one customer for phone number
-        String findCustomer = "select count(telefono) as contador from silverpos.clientes c where c.telefono = ?";
+
+    public boolean findCustomer(String phoneNumber) {
+        boolean find = false;
+    
+        // En esta consulta, busco un cliente por número de teléfono
+        String findCustomer = "SELECT COUNT(telefono) AS contador FROM silverpos.clientes c WHERE c.telefono = ?";
         try {
             Conexion con = new Conexion();
             Connection conexionMysql = con.conectar();
-
+    
             PreparedStatement st = conexionMysql.prepareStatement(findCustomer);
-            st.setString(1,phoneNumber);
+            st.setString(1, phoneNumber);
             ResultSet rs = st.executeQuery();
-
+    
             while (rs.next()) {
                 int exist = rs.getInt("contador");
-                resultado = (exist > 0) ? 1 : 0;
-                System.out.println("Resultado: " + resultado);
+                find = (exist > 0);
+                /* System.out.println("Encontrado: " + find); */
             }
-        }    catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        return resultado;
+        return find;
     }
+    
 
     public int insertCustomer(String name,String numberPhone){
         int idFound = 0;
