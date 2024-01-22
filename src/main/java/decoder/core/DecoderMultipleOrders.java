@@ -62,11 +62,10 @@ public class DecoderMultipleOrders {
 
     private void checkRequiredKeys(Decoder decoder, List<String> requiredKeys) {
         for (String key : requiredKeys) {
-            if(decoder.getValue(
-                decoder.normalizeString(key)
-            ) == ""){
-                this.errors.add("Falta el campo "+key+" revise su ortografia y continue");
+            if (decoder.getValue(decoder.normalizeString(key)).isEmpty()) {
+                this.errors.add("Falta el campo " + key + ", revise su ortografía y continúe");
             }
+
         }
     }
 
