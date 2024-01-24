@@ -1,7 +1,5 @@
 package Repositories;
 
-import com.google.common.collect.Sets;
-import org.apache.commons.text.similarity.JaroWinklerDistance;
 /* import org.apache.commons.text.similarity.LevenshteinDistance; */
 
 import controller.Conexion;
@@ -12,10 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ProductsRepository {
 
@@ -43,7 +38,7 @@ public class ProductsRepository {
     }
 
     public static int getIdProductByName(String productName) {
-        String query = "SELECT nombre, nombre_corto FROM silverpos.plus " +
+        String query = "SELECT id, nombre, nombre_corto FROM silverpos.plus " +
                 "WHERE activo = 1 AND LENGTH(nombre) > 0 AND id NOT IN (170, 171, 173, 180, 100) " +
                 "AND (nombre = ? OR nombre_corto = ?)";
 
