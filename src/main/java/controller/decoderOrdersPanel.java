@@ -338,6 +338,11 @@ public class decoderOrdersPanel {
             productFields.put(productComboBox, productFieldCantidad);
         }
 
+ 
+        editPanel.add(new JLabel("Envios:"));
+        JComboBox<String> deleveryCompBox = new JComboBox<>(ProductsRepository.getDeliveryNames().toArray(new String[0]));
+        editPanel.add(deleveryCompBox);
+
         // ... Otros campos de edición
         JButton saveButton = new JButton("Guardar");
         saveButton.addActionListener(e -> {

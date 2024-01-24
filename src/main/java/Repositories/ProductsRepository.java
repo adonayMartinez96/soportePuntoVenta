@@ -10,7 +10,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProductsRepository {
 
@@ -106,5 +108,53 @@ public class ProductsRepository {
 
         return null;
     }
+
+
+
+    public static List<Map<String, Object>> getDeliverys() {
+        String query = "SELECT id, nombre FROM silverpos.plus P WHERE P.id BETWEEN 170 AND 177 AND P.activo = 1";
+        List<Map<String, Object>> resultList = new ArrayList<>();
+
+        try (Connection connection = Conexion.conectarS();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String nombre = resultSet.getString("nombre");
+                Map<String, Object> rowMap = new HashMap<>();
+                rowMap.put("id", id);
+                rowMap.put("name", nombre);
+                resultList.add(rowMap);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return resultList;
+    }
+
+
+    public static List<String> getDeliveryNames() {
+        String query = "SELECT nombre FROM silverpos.plus P WHERE P.id BETWEEN 170 AND 177 AND P.activo = 1";
+        List<String> resultList = new ArrayList<>();
+    
+        try (Connection connection = Conexion.conectarS();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+    
+            while (resultSet.next()) {
+                String nombre = resultSet.getString("nombre");
+                resultList.add(nombre);
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return resultList;
+    }
+    
 
 }
