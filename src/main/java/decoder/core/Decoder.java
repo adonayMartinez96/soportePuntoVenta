@@ -78,6 +78,12 @@ public class Decoder {
          */
     }
 
+    public boolean existsKey(String key) {
+        return data.containsKey(this.translateKey(key).toLowerCase()) || this.getValue(key).equals("");
+    }
+
+    
+
     public static String getInitialIntegers(String texto) {
         int index = 0;
         for (int i = 0; i < texto.length(); i++) {
@@ -117,8 +123,19 @@ public class Decoder {
         return this.totalAmountProducts / this.getAmountProducts();
     }
 
+    public String getComment() {
+        String comment = this.getValue("comment");
+        String deliveryDate = this.existsKey(this.getDateOfDelivery()) ? " - " + this.getDateOfDelivery() : "";
+        return comment + deliveryDate;
+    }
+    
+
     public String getName() {
         return this.getValue("name");
+    }
+
+    public String getDateOfDelivery(){
+        return this.getValue("Date of delivery");
     }
 
     public String getPhone() {
@@ -192,6 +209,10 @@ public class Decoder {
                 return "fecha de entrega";
             case "salesperson":
                 return "encomendista";
+            case "comment":
+                return "comentario";
+            case "Date of delivery":
+                return "fecha de entrega";
             default:
                 return key;
         }
