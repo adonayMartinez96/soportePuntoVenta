@@ -49,8 +49,7 @@ public class decoderOrdersPanel {
     Boolean error = false;
     List<String> errorsList;
 
-
-    //todo el panel
+    // todo el panel
     JFrame frame;
 
     /*
@@ -83,7 +82,7 @@ public class decoderOrdersPanel {
         this.frame.setSize(this.screenWidth - 40, this.screenHeight - 100);
 
         this.frame.add(this.panel);
-        this.placeComponents(""); //vacio por defecto
+        this.placeComponents(""); // vacio por defecto
         this.frame.setContentPane(this.panel);
 
         this.frame.setVisible(true);
@@ -108,8 +107,6 @@ public class decoderOrdersPanel {
         this.buttonSave(textAreaHeight, !this.error);
 
     }
-
-
 
     private void buttonScann(int textAreaHeight, boolean enable) {
         JButton scanButton = new JButton("Scanear");
@@ -137,9 +134,11 @@ public class decoderOrdersPanel {
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
+
             if (!this.error) {
                 this.save();
             }
+
         });
         this.panel.add(save);
     }
@@ -165,11 +164,35 @@ public class decoderOrdersPanel {
         }
     }
 
+    public void printDebug() {
+        for (Decoder order : this.orders) {
+            System.out.println("Nombre: " + order.getName());
+            System.out.println("Dirección: " + order.getAllAddress());
+            System.out.println("Teléfono: " + order.getPhone());
+
+            Map<String, Integer> products = order.getProducts();
+
+            if (products.isEmpty()) {
+                System.out.println("No hay productos en este pedido.");
+            } else {
+                System.out.println("Productos en el pedido:");
+
+                for (Map.Entry<String, Integer> productEntry : products.entrySet()) {
+                    String productName = productEntry.getKey();
+                    int quantity = productEntry.getValue();
+
+                    System.out.println("   - Producto: " + productName + ", Cantidad: " + quantity);
+                }
+            }
+            System.out.println(); 
+        }
+    }
+
     public void printErrors(List<String> errors) {
         if (!errors.isEmpty()) {
             String errorMessage = "Errores:\n" + String.join("\n", errors);
             JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
-            this.frame.dispose(); //cerrar la ventana
+            this.frame.dispose(); // cerrar la ventana
         }
     }
 
@@ -306,7 +329,7 @@ public class decoderOrdersPanel {
             String productNameInput = entry.getKey();
             int productQuantityInput = entry.getValue();
 
-            JComboBox<String> productComboBox = createProductComboBox(productNameInput);
+            JComboBox<String> productComboBox = this.createProductComboBox(productNameInput);
             JTextField productFieldCantidad = new JTextField(Integer.toString(productQuantityInput));
             editPanel.add(new JLabel("Producto:"));
             editPanel.add(productComboBox);
@@ -347,22 +370,15 @@ public class decoderOrdersPanel {
             Map<String, Integer> updatedProducts = new LinkedHashMap<>();
 
             for (Map.Entry<JComboBox<String>, JTextField> entry : productFields.entrySet()) {
-                String productNameMutable = (String) entry.getKey().getSelectedItem(); // esto para obtener el
-                                                                                       // producto selecionado xd
-                int productQuantityMutable = Integer.parseInt(entry.getValue().getText());
+                String productName = (String) entry.getKey().getSelectedItem();
+                int productQuantity = Integer.parseInt(entry.getValue().getText());
 
-                for (Map.Entry<String, Integer> productEntry : singleOrder.getProducts().entrySet()) {
-                    String productNameTempInmutable = productEntry.getKey();
-                    int productQuantityTempInmutable = productEntry.getValue();
+                // Verificar si el producto existe y la cantidad ha cambiado
+                if (!productName.equals("No se encontró el producto, elige uno")) {
+                    int existingQuantity = singleOrder.getProducts().getOrDefault(productName, 0);
 
-                    if (productNameMutable.equals(productNameTempInmutable)) {
-                        // El nombre del producto coincide, verifica si hay cambios en la cantidad
-                        if (productQuantityMutable != productQuantityTempInmutable) {
-                            updatedProducts.put(productNameMutable, productQuantityMutable);
-                        }
-                    } else {
-                        // El nombre del producto no coincide, se mantendra el nombre original
-                        updatedProducts.put(productNameTempInmutable, productQuantityTempInmutable);
+                    if (productQuantity != existingQuantity) {
+                        updatedProducts.put(productName, productQuantity);
                     }
                 }
             }
@@ -392,7 +408,7 @@ public class decoderOrdersPanel {
 
     }
 
-    private static JComboBox<String> createProductComboBox(String initialProduct) {
+    private JComboBox<String> createProductComboBox(String initialProduct) {
         List<String> availableProducts = ProductsRepository.getAvailableProducts();
 
         String bestMatch = ProductsRepository.searchProduct(initialProduct);
