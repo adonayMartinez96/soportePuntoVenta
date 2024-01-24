@@ -42,7 +42,7 @@ public class OrderController {
         this.insertsIdsSalesProductsInsert = VentaDetallePlusRepository.extractInsertIds(this.dataInsertSaleProduct);
         this.dataInsertSaleComment = this.insertSaleComment();
 
-        System.out.println("Id de orden insertado: " + orderDateInsert);
+        System.out.println("Id de orden insertado: " +  this.orderIdInsert);
         System.out.println("Fecha: " + this.orderDateInsert);
 
     }
@@ -121,7 +121,9 @@ public class OrderController {
 
         Map<String, Integer> products = this.data.getProducts();
 
+        Integer count = 0;
         for (Map.Entry<String, Integer> entry : products.entrySet()) {
+            count = count + 1;
             String productNameInput = entry.getKey();
             Integer productQuantityInput = entry.getValue();
 
@@ -136,7 +138,8 @@ public class OrderController {
                 this.orderDateInsert,
                 this.orderIdInsert,
                 productName,
-                productQuantityInput);
+                productQuantityInput,
+                count);
 
                 /* aca se cambio por data.addAll por que ps eso creo que no tiene sentido xd */
             } else {

@@ -21,8 +21,8 @@ public class Conexion {
 
     public static void main(String[] args) {
         user = "root";
-        pass = "969696";
-        port = "3306";
+        pass = "";
+        port = "3366";
         url = "jdbc:mysql://localhost:" + port + "/impadi";
     }
 

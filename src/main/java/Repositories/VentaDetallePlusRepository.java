@@ -108,12 +108,11 @@ public class VentaDetallePlusRepository {
             insert.setColumn("idhoteldetaservicios", 0);
             insert.setColumn("web", 0);
 
-             CustomPreparedStatement customPreparedStatement = new CustomPreparedStatement(connection,
-                    "ventasdiarias.venta_detalle_plus"); 
+            CustomPreparedStatement customPreparedStatement = new CustomPreparedStatement(connection,
+                    "ventasdiarias.venta_detalle_plus");
 
             try (PreparedStatement preparedStatement = customPreparedStatement.prepareInsertStatement(
-               insert
-            )) {
+                    insert)) {
                 int rowsAffected = preparedStatement.executeUpdate();
 
                 if (rowsAffected > 0) {
@@ -124,18 +123,20 @@ public class VentaDetallePlusRepository {
                     }
                 }
                 result.put("rowsAffected", rowsAffected);
+                result.put("insertId", insertId);
+                result.put("insertedSequences", sequence);
             } catch (SQLException e) {
                 e.printStackTrace(); // Manejo de la excepción, puedes personalizarlo según tus necesidades
             }
-
-            result.put("insertId", insertId);
-            result.put("insertedSequences", sequence);
 
         } catch (SQLException e) {
             e.printStackTrace();
             result.put("error", e.getMessage());
         }
 
+        System.out.println("Insercion de una venta");
+        System.out.println("id: " + insertId);
+        System.out.println("numero ultimo secuencia: " + sequence);
         return result;
     }
 
@@ -171,11 +172,11 @@ public class VentaDetallePlusRepository {
      */
 
     public static List<Map<String, Object>> insertMultiplesSales(int idProduct, double unitPrice,
-            String dateOrderInsert, int idOrderInsert, String nameProduct, int productQuantityInput) {
+            String dateOrderInsert, int idOrderInsert, String nameProduct, int productQuantityInput, int sequence) {
         List<Map<String, Object>> resultsList = new ArrayList<>();
 
         for (int i = 0; i < productQuantityInput; i++) {
-            Map<String, Object> result = VentaDetallePlusRepository.insertOneSale(idProduct, i, unitPrice,
+            Map<String, Object> result = VentaDetallePlusRepository.insertOneSale(idProduct, sequence, unitPrice,
                     dateOrderInsert, idOrderInsert, nameProduct);
 
             resultsList.add(result);
@@ -191,7 +192,7 @@ public class VentaDetallePlusRepository {
     public static List<Integer> extractInsertIdsSequence(List<Map<String, Object>> resultsList) {
         return Extractor.extract(resultsList, "insertedSequences", Integer.class);
     }
-    
+
     public static Integer extractInsertLastSequence(List<Map<String, Object>> resultsList) {
         System.out.println("Este es lo que viee en el input");
         System.out.println(resultsList);
@@ -254,11 +255,10 @@ public class VentaDetallePlusRepository {
             insert.setColumn("web", 0);
 
             CustomPreparedStatement customPreparedStatement = new CustomPreparedStatement(connection,
-            "ventasdiarias.venta_detalle_plus"); 
+                    "ventasdiarias.venta_detalle_plus");
 
-    try (PreparedStatement preparedStatement = customPreparedStatement.prepareInsertStatement(
-        insert
-    )) {
+            try (PreparedStatement preparedStatement = customPreparedStatement.prepareInsertStatement(
+                    insert)) {
                 int rowsAffected = preparedStatement.executeUpdate();
                 Integer insertId = 0;
                 List<Integer> insertedSequences = new ArrayList<>();
