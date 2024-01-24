@@ -9,73 +9,111 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OrdersRepository {
+import Kernel.Respository.CustomPreparedStatement;
+import Kernel.Respository.Insert;
 
-    private static final String INSERT_ORDER_QUERY = "-- informacion de encabezado de orden insert,\n" +
-            "INSERT INTO ventasdiarias.venta_encabezado\n" +
-            "(idh, terminal, fechanegocio, fechatransaccion,\n" +
-            "no_orden, mesa, invitados, idcajero, tipo_propina, \n" +
-            "valor_propina, id_Ordertype, precuentas_prints, Cliente_temporal, idcliente,\n" +
-            "observacion, tipodoc, num_doc, id_z, id_cortecajero, \n" +
-            "no_habitacion, idmesero, cerrada, borrada, id_user_borro, \n" +
-            "id_z2, id_z3, id_resolution, birthday, sucursal_id, \n" +
-            "id_reporte, num_reporte, contingencia, serie, uuid,\n" +
-            "direccion, telefono, num_fac_electronica, firma64, idmotorista,\n" +
-            "direccion_domicilio, referencia_domicilio, cliente_domicilio, liquidada_motorista, anulado,\n" +
-            "razon_anulado, erp, web, serie_interna, hora_cocinado, \n" +
-            "hora_cerro, hora_asignacion_motorista, covid, cc, tipo, \n" +
-            "modelo, ano, comisionpagada, id_mecanico, mecanico)\n" +
-            "VALUES(0, 0, DATE_FORMAT(NOW(), '%Y-%m-%d'), now(),\n" +
-            "?, '0', '1', '3', '1', -- numero de orden\n" +
-            "'0,00', '1', '0', '', 1,\n" +
-            "?, 1, ?, 0, 0, -- numero telefono asocioado cliente, num_doc arriba de 50000\n" +
-            "'0', '3', 0, 0, 0,\n" +
-            "0, 0, 0, '', 1,\n" +
-            "0, '', '', '', '', \n" +
-            "'', '', '', '', 0, \n" +
-            "?, ?, ?, 0, 0, -- dirrecion_domicilio, referencia, nombre cliente\n" +
-            "'', 0, 0, '', '0001-01-01 00:00:00',\n" +
-            "'0001-01-01 00:00:00', '0001-01-01 00:00:00', 0, 0, '', \t\n" +
-            "'', '', 0, 0, '');";
+public class OrdersRepository {
 
     public static Map<String, Object> insertOrder(String address, String reference, String nameClient, String phone) {
         Map<String, Object> result = new HashMap<>();
+        Integer lastInsertedId = 0;
 
-        try (Connection connection = Conexion.conectarS();
-                PreparedStatement preparedStatement = connection.prepareStatement(INSERT_ORDER_QUERY,
-                        PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = Conexion.conectarS()) {
+            Insert insert = new Insert("ventasdiarias.venta_encabezado");
 
-            preparedStatement.setInt(1, getNextNumber("no_orden", 400));
-            preparedStatement.setString(2, phone);
-            preparedStatement.setInt(3, getNextNumber("num_doc", 50000));
-            preparedStatement.setString(4, address);
-            preparedStatement.setString(5, reference);
-            preparedStatement.setString(6, nameClient);
+            insert.setColumn("idh", 0);
+            insert.setColumn("terminal", 0);
+            insert.setColumn("fechanegocio", "DATE_FORMAT(NOW(), '%Y-%m-%d')");
+            insert.setColumn("fechatransaccion", "NOW()" );
+            insert.setColumn("no_orden", getNextNumber("no_orden", 400), true);
+            insert.setColumn("mesa", "0");
+            insert.setColumn("invitados", "1");
+            insert.setColumn("idcajero", "3");
+            insert.setColumn("tipo_propina", "1");
+            insert.setColumn("valor_propina", "0,00");
+            insert.setColumn("id_Ordertype", "1");
+            insert.setColumn("precuentas_prints", "0");
+            insert.setColumn("Cliente_temporal", "");
+            insert.setColumn("idcliente", 1);
+            insert.setColumn("observacion", "");
+            insert.setColumn("tipodoc", 1);
+            insert.setColumn("num_doc", getNextNumber("num_doc", 50000), true);
+            insert.setColumn("id_z", 0);
+            insert.setColumn("id_cortecajero", 0);
+            insert.setColumn("no_habitacion", "0");
+            insert.setColumn("idmesero", 0);
+            insert.setColumn("cerrada", 0);
+            insert.setColumn("borrada", 0);
+            insert.setColumn("id_user_borro", 0);
+            insert.setColumn("id_z2", 0);
+            insert.setColumn("id_z3", 0);
+            insert.setColumn("id_resolution", 0);
+            insert.setColumn("birthday", "");
+            insert.setColumn("sucursal_id", 1);
+            insert.setColumn("id_reporte", 0);
+            insert.setColumn("num_reporte", "");
+            insert.setColumn("contingencia", 0);
+            insert.setColumn("serie", "");
+            insert.setColumn("uuid", "");
+            insert.setColumn("direccion", "");
+            insert.setColumn("telefono", phone, true);
+            insert.setColumn("num_fac_electronica", "");
+            insert.setColumn("firma64", "");
+            insert.setColumn("idmotorista", 0);
+            insert.setColumn("direccion_domicilio", address, true);
+            insert.setColumn("referencia_domicilio", reference, true);
+            insert.setColumn("cliente_domicilio", nameClient, true);
+            insert.setColumn("liquidada_motorista", 0);
+            insert.setColumn("anulado", 0);
+            insert.setColumn("razon_anulado", "");
+            insert.setColumn("erp", 0);
+            insert.setColumn("web", 0);
+            insert.setColumn("serie_interna", "");
+            insert.setColumn("hora_cocinado", "0001-01-01 00:00:00");
+            insert.setColumn("hora_cerro", "0001-01-01 00:00:00");
+            insert.setColumn("hora_asignacion_motorista", "0001-01-01 00:00:00");
+            insert.setColumn("covid", 0);
+            insert.setColumn("cc", "");
+            insert.setColumn("tipo", "");
+            insert.setColumn("modelo", "");
+            insert.setColumn("ano", "");
+            insert.setColumn("comisionpagada", 0);
+            insert.setColumn("id_mecanico", 0);
+            insert.setColumn("mecanico", ""); 
 
-            preparedStatement.executeUpdate();
 
-            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int lastInsertedId = generatedKeys.getInt(1);
-                    result.put("id", lastInsertedId);
+        
+            //insert.debug();
 
-                    // Obtener la fecha actual en formato 'yyyy-MM-dd HH:mm:ss'
-                    java.util.Date date = new java.util.Date();
-                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String formattedDate = sdf.format(date);
-                    result.put("date", formattedDate);
+             CustomPreparedStatement customPreparedStatement = new CustomPreparedStatement(connection,
+                    "ventasdiarias.venta_encabezado"); 
 
-                    return result;
-                } else {
-                    throw new SQLException("No se pudo obtener el último ID insertado.");
+            try (PreparedStatement preparedStatement = customPreparedStatement.prepareInsertStatement(
+                insert
+            )) {
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            lastInsertedId = generatedKeys.getInt(1);
+                        }
+                    }
                 }
+
+                result.put("id", lastInsertedId);
+                result.put("date", OrdersRepository.getDateInsertOrder(lastInsertedId));
+                result.put("rowsAffected", rowsAffected);
+            } catch (SQLException e) {
+                e.printStackTrace(); // Manejo de la excepción, puedes personalizarlo según tus necesidades
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            result.put("id", -1); // En caso de error, establecer el ID a -1
-            return result;
+            result.put("error", e.getMessage());
         }
+
+        return result;
     }
 
     public static int getNextNumber(String columnName, int startingValue) {
@@ -84,12 +122,7 @@ public class OrdersRepository {
                         String.format("SELECT MAX(%s) FROM ventasdiarias.venta_encabezado", columnName))) {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    int maxNumber = resultSet.getInt(1);
-                    return Math.max(startingValue, maxNumber) + 1;
-                } else {
-                    return startingValue;
-                }
+                return resultSet.next() ? Math.max(startingValue, resultSet.getInt(1)) + 1 : startingValue;
             }
 
         } catch (SQLException e) {
@@ -97,5 +130,24 @@ public class OrdersRepository {
             return -1;
         }
     }
+
+
+    public static String getDateInsertOrder(int idOrder) {
+        try (Connection connection = Conexion.conectarS();
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "SELECT fechatransaccion FROM ventasdiarias.venta_encabezado WHERE id = ?")) {
+    
+            preparedStatement.setInt(1, idOrder);
+    
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() ? resultSet.getTimestamp(1).toString() : null;
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
 
 }
