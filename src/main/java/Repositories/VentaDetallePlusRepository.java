@@ -1,63 +1,292 @@
 package Repositories;
 
 import controller.Conexion;
+import Kernel.Respository.CustomPreparedStatement;
+import Kernel.Respository.Insert;
+import Kernel.utils.Extractor;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 /* 
  * Esta es la tabla donde se insertan las ventas de cada producto
  * luego que se cree la orden de compra, en esta tabla se guarda
  * los productos asociados a esa compra
  */
+import java.util.Map;
+
+/**
+ * Descripción de la tabla:
+ * 
+ * - Esta tabla es bien jodida rara xD
+ * porque cada producto que se ordena se guarda en una row diferente
+ * y si hay un comentario, también lo guarda en la row diferente
+ * -- 170 hasta 177 los envíos, luego en 180 hay algo llamado recargo 5% no sé
+ * qué significa,
+ * luego en la tabla 310 hay algo llamado descuento, que no sé qué es tampoco.
+ * En el id 390 hay algo llamado Varios, que no sé qué es.
+ * 
+ * - El id 100 y 173 de la tabla silverpos.plus están reservados para mensajes y
+ * guardar el envío.
+ * Igualmente, el campo solo dice "MENSAJE", así que hay que volver a setearlo
+ * en la columna
+ * ventadoarias.venta_detalle_plus.descripcion.
+ * 
+ * - La columna ventasdiarias.venta_detalle_plus.modificador siempre irá en uno
+ * al en el caso que id_plu sea 100.
+ * El 100 significa que es un comentario.
+ * 
+ * - La columna ventasdiarias.venta_detalle_plus.secuencia es solamente una
+ * secuencia para esa orden, contará todos
+ * los productos insertados y también contará todos los comentarios insertados.
+ * 
+ * - En idUser, sugiero poner un id único para identificar que el programa
+ * aparte hizo la orden y así poder depurar
+ * cuales son las órdenes insertadas por el programa y cuales no.
+ */
+
 public class VentaDetallePlusRepository {
 
-    private static final String INSERT_SALE_QUERY = "-- LUEGO DEL INSERT AL DETALLE ENCABEZADO RECUPERMOS, EL ID DEL ENCA Y ESE ASOCIAMOS A cada linea de detalle plus\n" +
-            "INSERT INTO ventasdiarias.venta_detalle_plus\n" +
-            "( idh, id_plu, cantidad, precio, \n" +
-            "descuento, id_umedida, horatransaccion, propina, minpreparacion,\n" +
-            "minentrega, descripcion, tax1, tax2, tax3,\n" +
-            "tax4, tax5, tax6, tax7, tax8, \n" +
-            "tax9, tax10, hold, id_enca, idmarcado,\n" +
-            "terminal, modificador, idmodificador, idtypemodificador, iduser,\n" +
-            "secuencia, borrado, id_user_borro, id_user_autorizo, id_centro_costo, \n" +
-            "peso, untaxable, descripcion2, identificador, precioinicial, \n" +
-            "erp, monitor, comision, idhoteldetaservicios, web)\n" +
-            "VALUES( 0, ?, 1.0, ?, -- id_plus(id producto) , -- division de los productos y de eso obtenemos el precio\n" +
-            "0.0000, '1', ?, 0.000000, '0',-- recuperar fecha de la orden insertada y ponerle esta\n" +
-            "'0', ?, 1.955752, 0.000000, 0.000000,-- traer la descripcion de id_plus y poner esa\n" +
-            "0.000000, 0.000000, 0.000000, 0.000000, 0.000000,\n" +
-            "0.000000, 0.000000, 0, ?, '2', '1', -- este es el id recuperado de venta encabezado insertado\n" +
-            "0, 0, 0, '3', 2, \n" +
-            "0, 0, 0, 0, 0.0,\n" +
-            "0, '', 'G', ?, 0, -- division de los productos y de eso obtenemos el precio\n" +
-            "0, 0.0, 0, 0);";
+    // En tu clase principal o donde estés realizando la inserción de ventas:
 
-    public static Integer insertVenta(int idProduct, double unitPrice, String dateOrderInsert, int idOrderInsert, String nameProduct) {
-        try (Connection connection = Conexion.conectarS();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SALE_QUERY, PreparedStatement.RETURN_GENERATED_KEYS)) {
+    public static Map<String, Object> insertOneSale(int idProduct, int sequence, double unitPrice,
+            String dateOrderInsert, int idOrderInsert,
+            String nameProduct) {
+        Map<String, Object> result = new HashMap<>();
+        Integer insertId = 0;
+        try (Connection connection = Conexion.conectarS()) {
 
-            preparedStatement.setInt(1, idProduct);
-            preparedStatement.setDouble(2, unitPrice);
-            preparedStatement.setString(3, dateOrderInsert);
-            preparedStatement.setString(4, nameProduct);
-            preparedStatement.setInt(5, idOrderInsert);
-            preparedStatement.setDouble(6, unitPrice);
+            Insert insert = new Insert("ventasdiarias.venta_detalle_plus");
 
-            preparedStatement.executeUpdate();
+            insert.setColumn("idh", 0);
+            insert.setColumn("id_plu", idProduct);
+            insert.setColumn("cantidad", 1.0); // esto creo que tambien hay que modificarlo x
+            insert.setColumn("precio", unitPrice);
+            insert.setColumn("descuento", 0.0000);
+            insert.setColumn("id_umedida", "1");
+            insert.setColumn("horatransaccion", dateOrderInsert);
+            insert.setColumn("propina", 0.000000);
+            insert.setColumn("minpreparacion", "0");
+            insert.setColumn("minentrega", "0");
+            insert.setColumn("descripcion", nameProduct);
+            insert.setColumn("tax1", unitPrice * 0.13); // la multiplicacion de 0.13 por el precio unitario
+            insert.setColumn("tax2", 0.000000);
+            insert.setColumn("tax3", 0.000000);
+            insert.setColumn("tax4", 0.000000);
+            insert.setColumn("tax5", 0.000000);
+            insert.setColumn("tax6", 0.000000);
+            insert.setColumn("tax7", 0.000000);
+            insert.setColumn("tax8", 0.000000);
+            insert.setColumn("tax9", 0.000000);
+            insert.setColumn("tax10", 0.000000);
+            insert.setColumn("hold", 0);
+            insert.setColumn("id_enca", idOrderInsert);
+            insert.setColumn("idmarcado", sequence); // secuencia 1, esto no afectara en la secuencia por que esto es
+                                                     // solamente para producntos
+            insert.setColumn("terminal", "1");
+            insert.setColumn("modificador", 0); // esto va cero por que esta insert es de un producto xd
+            insert.setColumn("idmodificador", 0); // esto siempre va en cero xd
+            insert.setColumn("idtypemodificador", 0); // siempre cero
+            insert.setColumn("iduser", "3"); // ponerle un user aca para el propio sistema
+            insert.setColumn("secuencia", sequence); // secuencia dos
+            insert.setColumn("borrado", 0);
+            insert.setColumn("id_user_borro", 0);
+            insert.setColumn("id_user_autorizo", 0);
+            insert.setColumn("id_centro_costo", 0);
+            insert.setColumn("peso", 0.0);
+            insert.setColumn("untaxable", 0);
+            insert.setColumn("descripcion2", "");
+            insert.setColumn("identificador", "G");
+            insert.setColumn("precioinicial", unitPrice);
+            insert.setColumn("erp", 0);
+            insert.setColumn("monitor", 0.0);
+            insert.setColumn("comision", 0);
+            insert.setColumn("idhoteldetaservicios", 0);
+            insert.setColumn("web", 0);
 
-            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1);
-                } else {
-                    throw new SQLException("No se pudo obtener el último ID insertado.");
+             CustomPreparedStatement customPreparedStatement = new CustomPreparedStatement(connection,
+                    "ventasdiarias.venta_detalle_plus"); 
+
+            try (PreparedStatement preparedStatement = customPreparedStatement.prepareInsertStatement(
+               insert
+            )) {
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            insertId = generatedKeys.getInt(1);
+                        }
+                    }
                 }
+                result.put("rowsAffected", rowsAffected);
+            } catch (SQLException e) {
+                e.printStackTrace(); // Manejo de la excepción, puedes personalizarlo según tus necesidades
+            }
+
+            result.put("insertId", insertId);
+            result.put("insertedSequences", sequence);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result.put("error", e.getMessage());
+        }
+
+        return result;
+    }
+
+    /*
+     * insertMultiplesSales lo que retornara es lo siguiente
+     * 
+     * [
+     * {
+     * insertId -> Integer
+     * insertedSequences -> Integer
+     * rowsAffected -> Integer
+     * },
+     * 
+     * {
+     * insertId -> Integer
+     * insertedSequences -> Integer
+     * rowsAffected -> Integer
+     * }
+     * 
+     * ]
+     * 
+     * con la funcion Extractor.extract lo que se obtiene es una lista del mapa de
+     * lo que contiene la misma
+     * key, por ejempplo, si queremos hacer un extract de insertedSequences nos
+     * devolvera lo siguiente:
+     * 
+     * 
+     * [
+     * Integer,
+     * Integer,
+     * Integer
+     * ]
+     */
+
+    public static List<Map<String, Object>> insertMultiplesSales(int idProduct, double unitPrice,
+            String dateOrderInsert, int idOrderInsert, String nameProduct, int productQuantityInput) {
+        List<Map<String, Object>> resultsList = new ArrayList<>();
+
+        for (int i = 0; i < productQuantityInput; i++) {
+            Map<String, Object> result = VentaDetallePlusRepository.insertOneSale(idProduct, i, unitPrice,
+                    dateOrderInsert, idOrderInsert, nameProduct);
+
+            resultsList.add(result);
+        }
+
+        return resultsList;
+    }
+
+    public static List<Integer> extractInsertIds(List<Map<String, Object>> resultsList) {
+        return Extractor.extract(resultsList, "insertId", Integer.class);
+    }
+
+    public static List<Integer> extractInsertIdsSequence(List<Map<String, Object>> resultsList) {
+        return Extractor.extract(resultsList, "insertedSequences", Integer.class);
+    }
+    
+    public static Integer extractInsertLastSequence(List<Map<String, Object>> resultsList) {
+        System.out.println("Este es lo que viee en el input");
+        System.out.println(resultsList);
+        List<Integer> allSequences = VentaDetallePlusRepository.extractInsertIdsSequence(resultsList);
+        System.out.println("Esto es lo que esta devolviendo todas las secuencias: ");
+        System.out.println(allSequences);
+        return allSequences.isEmpty() ? null : allSequences.get(allSequences.size() - 1);
+    }
+
+    public static List<Map<String, Object>> insertRowForCommet(String commet, String dateOrderInsert, int idInsertOrder,
+            int idmodificadorSequense, int SecuenceNormal) {
+        List<Map<String, Object>> resultList = new ArrayList<>();
+
+        try (Connection connection = Conexion.conectarS()) {
+            Insert insert = new Insert("ventasdiarias.venta_detalle_plus");
+
+            insert.setColumn("idh", 0);
+            insert.setColumn("id_plu", 100); // El 100 es el id de mensaje
+            insert.setColumn("cantidad", 1.0);
+            insert.setColumn("precio", 0.000000);
+            insert.setColumn("descuento", 0.0000);
+            insert.setColumn("id_umedida", "1");
+            insert.setColumn("horatransaccion", dateOrderInsert);
+            insert.setColumn("propina", 0.000000);
+            insert.setColumn("minpreparacion", "0");
+            insert.setColumn("minentrega", "0");
+            insert.setColumn("descripcion", commet);
+            insert.setColumn("tax1", 0.000000);
+            insert.setColumn("tax2", 0.000000);
+            insert.setColumn("tax3", 0.000000);
+            insert.setColumn("tax4", 0.000000);
+            insert.setColumn("tax5", 0.000000);
+            insert.setColumn("tax6", 0.000000);
+            insert.setColumn("tax7", 0.000000);
+            insert.setColumn("tax8", 0.000000);
+            insert.setColumn("tax9", 0.000000);
+            insert.setColumn("tax10", 0.000000);
+            insert.setColumn("hold", 0);
+            insert.setColumn("id_enca", idInsertOrder);
+            insert.setColumn("idmarcado", idmodificadorSequense); // idmodificadorSequense
+            insert.setColumn("terminal", "1");
+            insert.setColumn("modificador", 1); // uno para este caso por que es comentario xd
+            insert.setColumn("idmodificador", 0);
+            insert.setColumn("idtypemodificador", 0);
+            insert.setColumn("iduser", "3"); // Ponerle un user aquí para el propio sistema
+            insert.setColumn("secuencia", SecuenceNormal);
+            insert.setColumn("borrado", 0);
+            insert.setColumn("id_user_borro", 0);
+            insert.setColumn("id_user_autorizo", 0);
+            insert.setColumn("id_centro_costo", 0);
+            insert.setColumn("peso", 0.0);
+            insert.setColumn("untaxable", 0);
+            insert.setColumn("descripcion2", "");
+            insert.setColumn("identificador", "G");
+            insert.setColumn("precioinicial", 0.0000);
+            insert.setColumn("erp", 0);
+            insert.setColumn("monitor", 0.0);
+            insert.setColumn("comision", 0);
+            insert.setColumn("idhoteldetaservicios", 0);
+            insert.setColumn("web", 0);
+
+            CustomPreparedStatement customPreparedStatement = new CustomPreparedStatement(connection,
+            "ventasdiarias.venta_detalle_plus"); 
+
+    try (PreparedStatement preparedStatement = customPreparedStatement.prepareInsertStatement(
+        insert
+    )) {
+                int rowsAffected = preparedStatement.executeUpdate();
+                Integer insertId = 0;
+                List<Integer> insertedSequences = new ArrayList<>();
+
+                if (rowsAffected > 0) {
+                    try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                        while (generatedKeys.next()) {
+                            insertId = generatedKeys.getInt(1);
+                            insertedSequences.add(SecuenceNormal);
+                        }
+                    }
+                }
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("insertId", insertId);
+                result.put("insertedSequences", insertedSequences);
+                result.put("rowsAffected", rowsAffected);
+
+                resultList.add(result);
+            } catch (SQLException e) {
+                e.printStackTrace(); // Manejo de la excepción, puedes personalizarlo según tus necesidades
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return -1;
         }
+
+        return resultList;
     }
+
 }
