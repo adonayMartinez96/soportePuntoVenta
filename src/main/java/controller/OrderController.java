@@ -1,6 +1,7 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +23,9 @@ public class OrderController {
     public int addressSaveId;
     public int orderIdInsert;
     public String orderDateInsert;
-    public List<Integer> insertsSalesProductsInsert;
+    public List<Integer> insertsIdsSalesProductsInsert;
+    public List<Map<String, Object>> dataInsertSaleProduct;
+    public List<Map<String, Object>> dataInsertSaleComment;
 
     public OrderController(int idClient, Decoder data, boolean isNew) {
         this.idClient = idClient;
@@ -35,8 +38,12 @@ public class OrderController {
         Map<String, Object> order = this.insertOrder();
         this.orderIdInsert = (int) order.get("id");
         this.orderDateInsert = (String) order.get("date");
-        this.insertsSalesProductsInsert = this.insertSaleProduct();
+        this.dataInsertSaleProduct = this.insertSaleProduct();
+        this.insertsIdsSalesProductsInsert = VentaDetallePlusRepository.extractInsertIds(this.dataInsertSaleProduct);
+        this.dataInsertSaleComment = this.insertSaleComment();
 
+        System.out.println("Id de orden insertado: " + orderDateInsert);
+        System.out.println("Fecha: " + this.orderDateInsert);
 
     }
 
@@ -109,8 +116,9 @@ public class OrderController {
                 this.data.getPhone());
     }
 
-    private List<Integer> insertSaleProduct() {
-        List<Integer> insertedIds = new ArrayList<>();
+    private List<Map<String, Object>> insertSaleProduct() {
+        List<Map<String, Object>> data = new ArrayList<>(); // Declarar aquí
+
         Map<String, Integer> products = this.data.getProducts();
 
         for (Map.Entry<String, Integer> entry : products.entrySet()) {
@@ -122,16 +130,15 @@ public class OrderController {
             if (idProduct != -1) {
                 String productName = ProductsRepository.getProductNameById(idProduct);
 
-                for (int i = 0; i < productQuantityInput; i++) {
-                    int insertedId = VentaDetallePlusRepository.insertVenta(
-                            idProduct,
-                            this.data.getUnitPrice(),
-                            this.orderDateInsert,
-                            this.orderIdInsert,
-                            productName);
+               data = VentaDetallePlusRepository.insertMultiplesSales(
+                idProduct,
+                this.data.getUnitPrice(),
+                this.orderDateInsert,
+                this.orderIdInsert,
+                productName,
+                productQuantityInput);
 
-                    insertedIds.add(insertedId);
-                }
+                /* aca se cambio por data.addAll por que ps eso creo que no tiene sentido xd */
             } else {
                 JOptionPane.showMessageDialog(null,
                         "El producto: '" + productNameInput + "' no fue encontrado en la base de datos.",
@@ -141,7 +148,20 @@ public class OrderController {
             }
         }
 
-        return insertedIds;
+        return data;
+    }
+
+    private List<Map<String, Object>> insertSaleComment() {
+        if (!this.data.existsKey(this.data.getComment())) {
+            return Collections.emptyList(); // Retorna una lista vacía si la clave no existe
+        }
+
+        return VentaDetallePlusRepository.insertRowForCommet(
+                this.data.getComment(),
+                this.orderDateInsert,
+                this.orderIdInsert,
+                VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleProduct),
+                VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleProduct) + 1);
     }
 
     @Override
