@@ -26,6 +26,11 @@ public class OrderController {
     public List<Integer> insertsIdsSalesProductsInsert;
     public List<Map<String, Object>> dataInsertSaleProduct;
     public List<Map<String, Object>> dataInsertSaleComment;
+    public List<Map<String, Object>> dataInsertSaleDelivery;
+
+
+    public List<Integer> sequenceIdsInsertSale;
+    public Integer lastSequeceNumberInsertSale;
 
     public OrderController(int idClient, Decoder data, boolean isNew) {
         this.idClient = idClient;
@@ -40,8 +45,49 @@ public class OrderController {
         this.orderDateInsert = (String) order.get("date");
         this.dataInsertSaleProduct = this.insertSaleProduct();
         this.insertsIdsSalesProductsInsert = VentaDetallePlusRepository.extractInsertIds(this.dataInsertSaleProduct);
+
+
+        /* 
+         * 
+         * sequenceIdsInsertSale tiene una lista de enteros en orden 1 en 1, como esto:
+         * 
+         * 1, 2, 3
+         */
+        this.sequenceIdsInsertSale = VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleProduct);
+        this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleProduct);
+
+
+
         this.dataInsertSaleComment = this.insertSaleComment();
 
+        /* 
+         * Aca se deberia hacer un merge entre lo que tenia antes this.sequenceIdsInsertSale y lo que se extraera, quedaria algo como
+         * 
+         * antes:
+         * 1, 2, 3
+         * 
+         * el nuevo extract:
+         * 4, 5, 6
+         * 
+         * el merge
+         * 1, 2, 3, 4, 5, 6
+         * 
+         * si no hay nada de comentarios para insertar, pues  this.dataInsertSaleComment tendra una lista vacia y
+         * no se hara el merge
+         */
+        this.sequenceIdsInsertSale.addAll(VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleComment));
+        this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleComment);
+
+
+
+        //insertar envios
+        this.dataInsertSaleDelivery = this.insertSaleDelivery();
+        //actualizar la secuencia
+        this.sequenceIdsInsertSale.addAll(VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleDelivery));
+        this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleDelivery);
+
+
+       
         System.out.println("Id de orden insertado: " +  this.orderIdInsert);
         System.out.println("Fecha: " + this.orderDateInsert);
 
@@ -163,8 +209,29 @@ public class OrderController {
                 this.data.getComment(),
                 this.orderDateInsert,
                 this.orderIdInsert,
-                VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleProduct),
-                VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleProduct) + 1);
+                this.lastSequeceNumberInsertSale,
+                this.lastSequeceNumberInsertSale + 1);
+    }
+
+
+    private List<Map<String, Object>> insertSaleDelivery(){
+        if(!this.data.existDelivery()){
+            return Collections.emptyList();
+        }
+
+        List<Map<String, Object>> data =  VentaDetallePlusRepository.insertRowDelivery(
+            this.data.getIdDelivery(),
+            this.data.getNameDelivery(),
+            this.orderDateInsert,
+            this.orderIdInsert,
+            this.lastSequeceNumberInsertSale,
+            this.lastSequeceNumberInsertSale + 1
+        );
+
+        System.out.println("Esto es lo que tienda data: ");
+        System.out.println(data);
+        return data;
+
     }
 
     @Override
