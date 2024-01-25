@@ -35,7 +35,7 @@ public class OrdersRepository {
             insert.setColumn("precuentas_prints", "0");
             insert.setColumn("Cliente_temporal", "");
             insert.setColumn("idcliente", 1);
-            insert.setColumn("observacion", "");
+            insert.setColumn("observacion", phone, true);
             insert.setColumn("tipodoc", 1);
             insert.setColumn("num_doc", getNextNumber("num_doc", 50000), true);
             insert.setColumn("id_z", 0);
@@ -148,6 +148,8 @@ public class OrdersRepository {
             return null;
         }
     }
+
+
     
 
 }
