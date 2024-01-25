@@ -304,7 +304,7 @@ public class VentaDetallePlusRepository {
             insert.setColumn("minpreparacion", "0");
             insert.setColumn("minentrega", "0");
             insert.setColumn("descripcion", namePlusDelivery);
-            insert.setColumn("tax1", 0.000000);
+            insert.setColumn("tax1", Integer.parseInt(price) * 0.13, true);
             insert.setColumn("tax2", 0.000000);
             insert.setColumn("tax3", 0.000000);
             insert.setColumn("tax4", 0.000000);
