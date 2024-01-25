@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 import Models.Customer;
 import Repositories.CustomersRepository;
 import Repositories.ProductsRepository;
+import Repositories.VentaDetallePlusRepository;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -22,6 +23,7 @@ import java.awt.Toolkit;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.DecimalFormat;
 
 import decoder.core.DecoderMultipleOrders;
 import decoder.core.EncoderMultipleOrders;
@@ -186,7 +188,7 @@ public class decoderOrdersPanel {
                     System.out.println("   - Producto: " + productName + ", Cantidad: " + quantity);
                 }
             }
-            System.out.println(); 
+            System.out.println();
         }
     }
 
@@ -314,12 +316,14 @@ public class decoderOrdersPanel {
         editPanel.add(exactAddressField);
 
         JTextField totalAmountField = new JTextField(singleOrder.getTotal());
-        editPanel.add(new JLabel("Total a pagar:"));
+        editPanel.add(new JLabel("Total productos:"));
         editPanel.add(totalAmountField);
 
-        JTextField shippingField = new JTextField(singleOrder.getShipping());
+/* 
+        Esto lo comente por que ahora los envios no vienen del texto, vienen del combobox xd
+JTextField shippingField = new JTextField(singleOrder.getShipping());
         editPanel.add(new JLabel("Envio:"));
-        editPanel.add(shippingField);
+        editPanel.add(shippingField); */
 
         JTextField deliveryDateField = new JTextField(singleOrder.getDeliveryDate());
         editPanel.add(new JLabel("Fecha entrega:"));
@@ -347,7 +351,24 @@ public class decoderOrdersPanel {
         JComboBox<String> deliveryComboBox = new JComboBox<>(nameList.toArray(new String[0]));
         editPanel.add(deliveryComboBox);
 
-        // ... Otros campos de edición
+        JTextField total = new JTextField(singleOrder.getTotal());
+        editPanel.add(new JLabel("Total a pagar:"));
+        editPanel.add(total);
+
+        // Establecer el formato para redondear a dos decimales
+        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+        deliveryComboBox.addActionListener(e -> {
+            String selectedDeliveryName = (String) deliveryComboBox.getSelectedItem();
+            Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
+            double deliveryPrice = Double
+                    .parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryId));
+            double currentTotal = Double.parseDouble(singleOrder.getTotal());
+            double newTotal = deliveryPrice + currentTotal;
+            newTotal = Double.parseDouble(decimalFormat.format(newTotal));
+            total.setText(String.valueOf(newTotal));
+        });
+
         JButton saveButton = new JButton("Guardar");
         saveButton.addActionListener(e -> {
             /*
@@ -366,7 +387,7 @@ public class decoderOrdersPanel {
             singleOrder.setData("city", departmentField.getText() + " - " + cityField.getText());
             singleOrder.setData("address", exactAddressField.getText());
             singleOrder.setData("price", totalAmountField.getText());
-            singleOrder.setData("shipping", shippingField.getText());
+            /* singleOrder.setData("shipping", shippingField.getText()); */
             singleOrder.setData("total", totalAmountField.getText());
             singleOrder.setData("delivery date", deliveryDateField.getText());
 
