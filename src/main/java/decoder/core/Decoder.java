@@ -201,10 +201,9 @@ public class Decoder {
     }
 
     public Boolean existDelivery(){
-        //si habia selecionado "sin envio" es por que significa que viene la key -1
-        return this.delivery.containsKey(-1);
-    }
-    
+        // Retornar true si hay un ID de entrega diferente de -1
+        return this.getIdDelivery() != -1;
+    }    
 
     public int getIdDelivery() {
         if (!delivery.isEmpty()) {
