@@ -400,22 +400,23 @@ public class decoderOrdersPanel {
              * nameProduct -> quantity
              */
             Map<String, Integer> updatedProducts = new LinkedHashMap<>();
-
             for (Map.Entry<JComboBox<String>, JTextField> entry : productFields.entrySet()) {
                 String productName = (String) entry.getKey().getSelectedItem();
                 int productQuantity = Integer.parseInt(entry.getValue().getText());
-
-                // Verificar si el producto existe y la cantidad ha cambiado
-                if (!productName.equals("No se encontró el producto, elige uno")) {
-                    int existingQuantity = singleOrder.getProducts().getOrDefault(productName, 0);
-
-                    if (productQuantity != existingQuantity) {
-                        updatedProducts.put(productName, productQuantity);
-                    }
-                }
+                updatedProducts.put(productName, productQuantity);
             }
-
-            singleOrder.editData(updatedProducts);
+            
+            Map<String, Integer> mainMapProducts = singleOrder.getProducts(); 
+            Map<String, Integer> finalProducts = new LinkedHashMap<>(mainMapProducts);
+            finalProducts.keySet().retainAll(updatedProducts.keySet());
+            for (Map.Entry<String, Integer> entry : updatedProducts.entrySet()) {
+                String productName = entry.getKey();
+                Integer updatedQuantity = entry.getValue();
+                finalProducts.put(productName, updatedQuantity);
+            }
+            
+            singleOrder.editData(finalProducts);
+            
 
             String selectedDeliveryName = (String) deliveryComboBox.getSelectedItem();
             Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
