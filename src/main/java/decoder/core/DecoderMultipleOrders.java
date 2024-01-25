@@ -51,14 +51,24 @@ public class DecoderMultipleOrders {
 
     public void decode() {
         String[] orderBlocks = ordersString.split(headerStartOrder);
+        if (orderBlocks.length <= 1) {
+            this.errors.add("No se encontró el delimitador '" + headerStartOrder + "'");
+            return;
+        }
+    
         for (String block : orderBlocks) {
             if (!block.trim().isEmpty()) {
                 Decoder decoder = new Decoder(block);
+                if(decoder.existError()){
+                    this.errors.addAll(decoder.getErrors());
+                    return;
+                }
                 this.checkRequiredKeys(decoder, requiredKeys);
                 orders.add(decoder);
             }
         }
     }
+    
 
     private void checkRequiredKeys(Decoder decoder, List<String> requiredKeys) {
         List<String> notFoundKeys = new ArrayList<>();

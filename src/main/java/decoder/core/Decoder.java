@@ -17,12 +17,16 @@ public class Decoder {
 
     private Map<Integer, String> delivery;
 
+
+    private List<String> errors;
+
     public Decoder(String input) {
+        this.errors = new ArrayList<>();
         this.delivery = new LinkedHashMap<>();
         this.inputString = input;
         this.data = new LinkedHashMap<>();
         this.products = new LinkedHashMap<>();
-        decodeData(input);
+        this.decodeData(input);
         this.totalToPay = Double.parseDouble(this.getTotal());
         this.shipmentCost = Double.parseDouble(this.getShipping());
         this.totalAmountProducts = this.totalToPay - this.shipmentCost;
@@ -40,34 +44,71 @@ public class Decoder {
 
     private void decodeData(String input) {
         String[] lines = input.split("\\n");
-        for (String line : lines) {
+        boolean productosKeyFound = false;
+    
+        for (int count = 0; count < lines.length; count++) {
+            String line = lines[count];
+    
+            // Se obvia la primer alinea por que es un encabezado nada mas
+            if (count == 0) {
+                continue;
+            }
+    
             String[] parts = line.split(":", 2);
-            if (parts.length == 2) {
-                String key = normalizeString(parts[0].trim());
-                String value = parts[1].trim();
-                if (key.startsWith("productos")) {
-                    decodeProducts(value);
-                } else {
-                    data.put(key, value);
+    
+            if (parts.length != 2) {
+                this.errors.add("Error en línea " + count + ": '" + line + "'. No se encontró ':' o el formato es incorrecto.");
+                continue;
+            }
+    
+            String key = this.normalizeString(parts[0].trim());
+            String value = parts[1].trim();
+    
+            if (key.isEmpty() || value.isEmpty()) {
+                this.errors.add("Error en línea " + count + ": '" + line + "'. La clave o el valor están vacíos.");
+                continue;
+            }
+    
+            if (key.startsWith("productos")) {
+                if (productosKeyFound) {
+                    this.errors.add("Error en línea " + count + ": '" + line + "'. Ya se encontró la clave 'productos' previamente.");
+                    continue;
                 }
+                productosKeyFound = true;
+                this.decodeProducts(value);
+            } else {
+                data.put(key, value);
+            }
+        }
+    
+        if (!productosKeyFound) {
+            this.errors.add("No se encontró la clave 'productos'. Corrija y vuelva a intentarlo.");
+        }
+    }
+    
+    
+    
+    
+
+    private void decodeProducts(String productsString) {
+        String[] productParts = productsString.split("\\s*\\+\\s*");
+    
+        for (String productPart : productParts) {
+            // Le quito los espacios al inicio y al final
+            String productRow = productPart.trim();
+            String amount = Decoder.getInitialIntegers(productRow);
+            String product = Decoder.removeInitialIntegers(productRow);
+    
+            try {
+                // Si la cantidad no está presente, se supone que es 1
+                int quantity = (amount == null || amount.isEmpty()) ? 1 : Integer.parseInt(amount);
+                this.products.put(this.translateKey(product).toLowerCase(), quantity);
+            } catch (NumberFormatException e) {
+                this.errors.add("Error al convertir la cantidad del producto: " + productRow);
             }
         }
     }
-
-    private void decodeProducts(String productsString) {
-        String[] productParts = productsString.split(" \\+ ");
-        for (String productPart : productParts) {
-
-            // le quito los espacios
-            String productRow = productPart.replaceAll("\\s", "");
-            String amount = Decoder.getInitialIntegers(productRow);
-            String product = Decoder.removeInitialIntegers(productRow);
-            // esto significa que no se puso la cantidad de producto asi que se supondra que
-            // es solamente uno
-            this.products.put(this.translateKey(product).toLowerCase(), amount == null ? 1 : Integer.parseInt(amount));
-
-        }
-    }
+    
 
     public String getValue(String key) {
         String translatedKey = translateKey(key);
@@ -86,7 +127,13 @@ public class Decoder {
         return data.containsKey(this.translateKey(key).toLowerCase()) || this.getValue(key).equals("");
     }
 
-    
+    public boolean existError(){
+        return this.errors.size() != 0;
+    }
+
+    public List<String> getErrors(){
+        return this.errors;
+    }
 
     public static String getInitialIntegers(String texto) {
         int index = 0;
