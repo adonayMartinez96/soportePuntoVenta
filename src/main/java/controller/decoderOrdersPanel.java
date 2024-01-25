@@ -23,7 +23,6 @@ import java.awt.Toolkit;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.text.DecimalFormat;
 
 import decoder.core.DecoderMultipleOrders;
 import decoder.core.EncoderMultipleOrders;
@@ -319,11 +318,13 @@ public class decoderOrdersPanel {
         editPanel.add(new JLabel("Total productos:"));
         editPanel.add(totalAmountField);
 
-/* 
-        Esto lo comente por que ahora los envios no vienen del texto, vienen del combobox xd
-JTextField shippingField = new JTextField(singleOrder.getShipping());
-        editPanel.add(new JLabel("Envio:"));
-        editPanel.add(shippingField); */
+        /*
+         * Esto lo comente por que ahora los envios no vienen del texto, vienen del
+         * combobox xd
+         * JTextField shippingField = new JTextField(singleOrder.getShipping());
+         * editPanel.add(new JLabel("Envio:"));
+         * editPanel.add(shippingField);
+         */
 
         JTextField deliveryDateField = new JTextField(singleOrder.getDeliveryDate());
         editPanel.add(new JLabel("Fecha entrega:"));
@@ -355,9 +356,6 @@ JTextField shippingField = new JTextField(singleOrder.getShipping());
         editPanel.add(new JLabel("Total a pagar:"));
         editPanel.add(total);
 
-        // Establecer el formato para redondear a dos decimales
-        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-
         deliveryComboBox.addActionListener(e -> {
             String selectedDeliveryName = (String) deliveryComboBox.getSelectedItem();
             Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
@@ -365,10 +363,12 @@ JTextField shippingField = new JTextField(singleOrder.getShipping());
                     .parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryId));
             double currentTotal = Double.parseDouble(singleOrder.getTotal());
             double newTotal = deliveryPrice + currentTotal;
-            newTotal = Double.parseDouble(decimalFormat.format(newTotal));
+
+            // Redondear a dos decimales utilizando Math.round
+            newTotal = roundToTwoDecimals(newTotal);
+
             total.setText(String.valueOf(newTotal));
         });
-
         JButton saveButton = new JButton("Guardar");
         saveButton.addActionListener(e -> {
             /*
@@ -463,4 +463,8 @@ JTextField shippingField = new JTextField(singleOrder.getShipping());
         return productComboBox;
     }
 
+
+    private double roundToTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
 }
