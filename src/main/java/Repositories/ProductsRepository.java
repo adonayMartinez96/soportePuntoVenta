@@ -136,25 +136,29 @@ public class ProductsRepository {
     }
 
 
-    public static List<String> getDeliveryNames() {
-        String query = "SELECT nombre FROM silverpos.plus P WHERE P.id BETWEEN 170 AND 177 AND P.activo = 1";
-        List<String> resultList = new ArrayList<>();
-    
+    public static Map<Integer, String> getDeliveryMap() {
+        String query = "SELECT id, nombre FROM silverpos.plus P WHERE P.id BETWEEN 170 AND 177 AND P.activo = 1";
+        Map<Integer, String> resultMap = new HashMap<>();
+        
         try (Connection connection = Conexion.conectarS();
              PreparedStatement preparedStatement = connection.prepareStatement(query);
              ResultSet resultSet = preparedStatement.executeQuery()) {
-    
+        
             while (resultSet.next()) {
+                int id = resultSet.getInt("id");
                 String nombre = resultSet.getString("nombre");
-                resultList.add(nombre);
+                resultMap.put(id, nombre);
             }
-    
+
+            resultMap.put(-1, "Sin envio");
+        
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
-        return resultList;
+        
+        return resultMap;
     }
+    
     
 
 }
