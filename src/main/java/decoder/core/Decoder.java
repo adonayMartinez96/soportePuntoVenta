@@ -30,7 +30,6 @@ public class Decoder {
         this.totalToPay = Double.parseDouble(this.getTotal());
         this.shipmentCost = Double.parseDouble(this.getShipping());
         this.totalAmountProducts = this.totalToPay - this.shipmentCost;
-
     }
 
     public String getStringData(){
@@ -213,11 +212,11 @@ public class Decoder {
     }
 
     public String getShipping() {
-        return this.getValue("shipping");
+        return String.valueOf(this.extractAmount(this.getValue("shipping")));
     }
 
     public String getTotal() {
-        return this.getValue("total");
+        return String.valueOf(this.extractAmount(this.getValue("total")));
     }
 
     public String getDeliveryDate() {
@@ -269,6 +268,17 @@ public class Decoder {
             return "Sin entrega";
         }
     }
+
+    public double extractAmount(String input) {
+        String cleanNumber = input.replaceAll("[^\\d.]", "");
+        try {
+            return Double.parseDouble(cleanNumber);
+        } catch (NumberFormatException e) {
+            System.err.println("Error al convertir a double: " + input);
+            return 0.0;
+        }
+    }
+    
 
     private String translateKey(String key) {
         switch (key.toLowerCase()) {
