@@ -14,7 +14,11 @@ public class Decoder {
 
     private String inputString;
 
+
+    private Map<Integer, String> delivery;
+
     public Decoder(String input) {
+        this.delivery = new LinkedHashMap<>();
         this.inputString = input;
         this.data = new LinkedHashMap<>();
         this.products = new LinkedHashMap<>();
@@ -185,7 +189,40 @@ public class Decoder {
     public void editData(Map<String, Integer> newMap) {
         this.products = newMap;
     }
+
+
+    public void setDelivery(Integer id, String name){
+        this.delivery.put(id, name);
+    }
+
+
+    public Map<Integer, String> getDelivery(){
+        return this.delivery;
+    }
+
+    public Boolean existDelivery(){
+        //si habia selecionado "sin envio" es por que significa que viene la key -1
+        return this.delivery.containsKey(-1);
+    }
     
+
+    public int getIdDelivery() {
+        if (!delivery.isEmpty()) {
+            Map.Entry<Integer, String> firstEntry = delivery.entrySet().iterator().next();
+            return firstEntry.getKey();
+        } else {
+            return -1;
+        }
+    }
+
+    public String getNameDelivery() {
+        if (!delivery.isEmpty()) {
+            Map.Entry<Integer, String> firstEntry = delivery.entrySet().iterator().next();
+            return firstEntry.getValue();
+        } else {
+            return "Sin entrega";
+        }
+    }
 
     private String translateKey(String key) {
         switch (key.toLowerCase()) {
