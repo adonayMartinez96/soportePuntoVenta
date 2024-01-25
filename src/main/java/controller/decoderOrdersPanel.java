@@ -64,8 +64,9 @@ public class decoderOrdersPanel {
         orders.addRequiredKey("Ciudad");
         orders.addRequiredKey("Departamento");
         orders.addRequiredKey("Total a pagar");
-        orders.addRequiredKey("Envío");
+       /// orders.addRequiredKey("Envío");
         orders.addRequiredKey("Fecha de entrega");
+       // orders.addRequiredKey("productos|Productos");
     }
 
     public decoderOrdersPanel() {
@@ -287,7 +288,8 @@ public class decoderOrdersPanel {
         JFrame editFrame = new JFrame(
                 "Scaneando pedido " + (currentIndex + 1) + " de " + totalOrders + " (" + singleOrder.getName() + ")");
         editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        editFrame.setSize(400, 300);
+        editFrame.setSize(this.screenWidth - 200, this.screenHeight - 300);
+        editFrame.setLocationRelativeTo(null);
 
         JPanel editPanel = new JPanel();
         editFrame.add(editPanel);
