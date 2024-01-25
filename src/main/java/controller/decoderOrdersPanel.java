@@ -137,6 +137,8 @@ public class decoderOrdersPanel {
 
             if (!this.error) {
                 this.save();
+                JOptionPane.showMessageDialog(null, "¡Guardado exitoso!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                this.frame.dispose();
             }
 
         });
@@ -338,10 +340,12 @@ public class decoderOrdersPanel {
             productFields.put(productComboBox, productFieldCantidad);
         }
 
- 
+        Map<Integer, String> deliveryMap = ProductsRepository.getDeliveryMap();
+        List<Integer> idList = new ArrayList<>(deliveryMap.keySet());
+        List<String> nameList = new ArrayList<>(deliveryMap.values());
         editPanel.add(new JLabel("Envios:"));
-        JComboBox<String> deleveryCompBox = new JComboBox<>(ProductsRepository.getDeliveryNames().toArray(new String[0]));
-        editPanel.add(deleveryCompBox);
+        JComboBox<String> deliveryComboBox = new JComboBox<>(nameList.toArray(new String[0]));
+        editPanel.add(deliveryComboBox);
 
         // ... Otros campos de edición
         JButton saveButton = new JButton("Guardar");
@@ -389,6 +393,10 @@ public class decoderOrdersPanel {
             }
 
             singleOrder.editData(updatedProducts);
+
+            String selectedDeliveryName = (String) deliveryComboBox.getSelectedItem();
+            Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
+            singleOrder.setDelivery(selectedDeliveryId, selectedDeliveryName);
 
             this.updateTextArea(); // ver esa cosa que esta haciendo bugs :c
             editFrame.dispose();
