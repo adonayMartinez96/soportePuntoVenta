@@ -58,7 +58,7 @@ public class decoderOrdersPanel {
      * mas keys desde aca
      */
     private void requiredKeys(DecoderMultipleOrders orders) {
-        orders.addRequiredKey("Teléfono");
+        orders.addRequiredKey("Teléfono|telefono|Telefono");
         orders.addRequiredKey("Nombre");
         orders.addRequiredKey("Ciudad");
         orders.addRequiredKey("Departamento");
