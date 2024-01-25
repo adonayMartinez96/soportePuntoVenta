@@ -61,11 +61,29 @@ public class DecoderMultipleOrders {
     }
 
     private void checkRequiredKeys(Decoder decoder, List<String> requiredKeys) {
-        for (String key : requiredKeys) {
-            if (decoder.getValue(decoder.normalizeString(key)).isEmpty()) {
-                this.errors.add("Falta el campo " + key + ", revise su ortografía y continúe");
+        List<String> notFoundKeys = new ArrayList<>();
+    
+        for (String requiredKey : requiredKeys) {
+            String[] keyParts = requiredKey.split("\\|");
+            boolean found = false;
+    
+            for (String part : keyParts) {
+                if (!decoder.getValue(decoder.normalizeString(part)).isEmpty()) {
+                    found = true;
+                    break;
+                }
             }
-
+    
+            if (!found) {
+                notFoundKeys.add(requiredKey);
+            }
+        }
+    
+        if (!notFoundKeys.isEmpty()) {
+            String errorMessage = "No se encontraron las siguientes claves requeridas: " +
+                    String.join(", ", notFoundKeys) +
+                    ". Revise su ortografía y continúe.";
+            this.errors.add(errorMessage);
         }
     }
 
