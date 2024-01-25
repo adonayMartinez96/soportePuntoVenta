@@ -56,7 +56,9 @@ public class OrderController {
         this.sequenceIdsInsertSale = VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleProduct);
         this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleProduct);
 
-
+        System.out.println("esto es el ultimo: " + this.lastSequeceNumberInsertSale);
+        System.out.println(this.dataInsertSaleComment);
+        System.out.println(this.sequenceIdsInsertSale);
 
         this.dataInsertSaleComment = this.insertSaleComment();
 
@@ -78,13 +80,20 @@ public class OrderController {
         this.sequenceIdsInsertSale.addAll(VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleComment));
         this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleComment);
 
-
-
+        System.out.println("esto es el ultimo: " + this.lastSequeceNumberInsertSale);
+        System.out.println("Esto es el merge: ");
+        System.out.println(VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleComment));
+        System.out.println(this.dataInsertSaleComment);
+        System.out.println(this.sequenceIdsInsertSale);
         //insertar envios
         this.dataInsertSaleDelivery = this.insertSaleDelivery();
-        //actualizar la secuencia
-        this.sequenceIdsInsertSale.addAll(VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleDelivery));
-        this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleDelivery);
+
+        if(!this.dataInsertSaleDelivery.isEmpty()){
+             //actualizar la secuencia
+            this.sequenceIdsInsertSale.addAll(VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleDelivery));
+            this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleDelivery);
+        }
+       
 
 
        
@@ -163,42 +172,43 @@ public class OrderController {
     }
 
     private List<Map<String, Object>> insertSaleProduct() {
-        List<Map<String, Object>> data = new ArrayList<>(); // Declarar aquí
-
+        List<Map<String, Object>> data = new ArrayList<>();
         Map<String, Integer> products = this.data.getProducts();
-
-        Integer count = 0;
+    
+        int count = 0;
         for (Map.Entry<String, Integer> entry : products.entrySet()) {
-            count = count + 1;
+            count++;
             String productNameInput = entry.getKey();
             Integer productQuantityInput = entry.getValue();
-
+    
             int idProduct = ProductsRepository.getIdProductByName(productNameInput);
-
+    
             if (idProduct != -1) {
                 String productName = ProductsRepository.getProductNameById(idProduct);
-
-               data = VentaDetallePlusRepository.insertMultiplesSales(
-                idProduct,
-                this.data.getUnitPrice(),
-                this.orderDateInsert,
-                this.orderIdInsert,
-                productName,
-                productQuantityInput,
-                count);
-
-                /* aca se cambio por data.addAll por que ps eso creo que no tiene sentido xd */
+    
+                List<Map<String, Object>> currentData = VentaDetallePlusRepository.insertMultiplesSales(
+                        idProduct,
+                        this.data.getUnitPrice(),
+                        this.orderDateInsert,
+                        this.orderIdInsert,
+                        productName,
+                        productQuantityInput,
+                        count);
+    
+                data.addAll(currentData);
             } else {
                 JOptionPane.showMessageDialog(null,
                         "El producto: '" + productNameInput + "' no fue encontrado en la base de datos.",
                         "Producto no encontrado", JOptionPane.WARNING_MESSAGE);
-
+    
                 System.out.println("Producto: " + productNameInput + ", Cantidad: " + productQuantityInput);
             }
         }
-
+    
         return data;
     }
+    
+    
 
     private List<Map<String, Object>> insertSaleComment() {
         if (!this.data.existsKey(this.data.getComment())) {
@@ -215,11 +225,11 @@ public class OrderController {
 
 
     private List<Map<String, Object>> insertSaleDelivery(){
-        if(!this.data.existDelivery()){
+        if (!this.data.existDelivery()) {
             return Collections.emptyList();
         }
-
-        List<Map<String, Object>> data =  VentaDetallePlusRepository.insertRowDelivery(
+    
+        List<Map<String, Object>> data = VentaDetallePlusRepository.insertRowDelivery(
             this.data.getIdDelivery(),
             this.data.getNameDelivery(),
             this.orderDateInsert,
@@ -227,12 +237,9 @@ public class OrderController {
             this.lastSequeceNumberInsertSale,
             this.lastSequeceNumberInsertSale + 1
         );
-
-        System.out.println("Esto es lo que tienda data: ");
-        System.out.println(data);
         return data;
-
     }
+    
 
     @Override
     public String toString() {
