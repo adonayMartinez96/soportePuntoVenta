@@ -45,14 +45,15 @@ public class OpenAIClient {
 
 
             PromptProcessorGpt processorGpt = new PromptProcessorGpt(prompt);
-           // System.out.println(processorGpt.getPromt());
+            
            // System.out.println(processorGpt.getResponse()); 
 
 
            try {
             OpenAIClient openAIClient = new OpenAIClient(Config.getApiKeyOpenIA());
             String model = "gpt-3.5-turbo-instruct";
-            String response = openAIClient.createCompletion(model,processorGpt.getPromt());
+            System.out.println(processorGpt.getPromt());
+            String response = openAIClient.createCompletion(model, processorGpt.getPromt());
             System.out.println(response);
           } catch (Exception e) {
             e.printStackTrace();
@@ -80,4 +81,7 @@ public class OpenAIClient {
 
         return stringBuilder.toString();
     }
+
+
+    
 }

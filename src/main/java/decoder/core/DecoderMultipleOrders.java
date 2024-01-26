@@ -88,7 +88,7 @@ public class DecoderMultipleOrders {
                     this.errors.addAll(decoder.getErrors());
                     return;
                 }
-                this.checkRequiredKeys(decoder, requiredKeys);
+              //  this.checkRequiredKeys(decoder, requiredKeys);
                 orders.add(decoder);
             }
         }

@@ -11,6 +11,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class HttpClientManager {
@@ -26,13 +27,8 @@ public class HttpClientManager {
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             httpPost.setHeader(entry.getKey(), entry.getValue());
         }
-        StringEntity requestEntity = new StringEntity(requestBody);
+        StringEntity requestEntity = new StringEntity(requestBody, StandardCharsets.UTF_8);
         httpPost.setEntity(requestEntity);
-
-        // Imprimir detalles de la solicitud
-        //System.out.println("Detalles de la solicitud (POST): " + httpPost.getRequestLine());
-        //System.out.println("Encabezados: " + Arrays.toString(httpPost.getAllHeaders()));
-        //System.out.println("Cuerpo (Body): " + requestBody);
 
         return executeRequest(httpPost);
     }

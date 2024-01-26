@@ -42,7 +42,9 @@ public class Decoder {
     }
 
     private void decodeData(String input) {
-        String[] lines = input.split("\\n");
+        System.out.println("ESTO ES EL INPUTT: ");
+        System.out.println(input.trim());
+        String[] lines = input.trim().split("\\n");
         boolean productosKeyFound = false;
     
         for (int count = 0; count < lines.length; count++) {

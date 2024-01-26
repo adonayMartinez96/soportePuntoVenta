@@ -60,9 +60,9 @@ public class decoderOrdersPanel {
      */
     private void requiredKeys(DecoderMultipleOrders orders) {
         orders.addRequiredKey("Teléfono|telefono|Telefono");
-        orders.addRequiredKey("Nombre");
-        orders.addRequiredKey("Ciudad");
-        orders.addRequiredKey("Departamento");
+        orders.addRequiredKey("Nombre|nombre");
+        orders.addRequiredKey("Ciudad|ciudad");
+        orders.addRequiredKey("Departamento|departamento");
         orders.addRequiredKey("Total a pagar");
        /// orders.addRequiredKey("Envío");
         orders.addRequiredKey("Fecha de entrega");
