@@ -3,6 +3,11 @@ package decoder.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+
+import Kernel.openia.OpenAIResponse;
+import Kernel.openia.PromptProcessorGpt;
+
 public class DecoderMultipleOrders {
 
     private List<Decoder> orders;
@@ -58,7 +63,27 @@ public class DecoderMultipleOrders {
     
         for (String block : orderBlocks) {
             if (!block.trim().isEmpty()) {
-                Decoder decoder = new Decoder(block);
+                PromptProcessorGpt promptProcessor = new PromptProcessorGpt(block);
+                Gson gson = new Gson();
+                String jsonResponse = promptProcessor.getResponse();
+                String response = "";
+                System.out.println(jsonResponse);
+                if (jsonResponse != null) {
+                    OpenAIResponse openAIResponse = gson.fromJson(jsonResponse, OpenAIResponse.class);
+                
+                    if (openAIResponse != null && openAIResponse.getChoices() != null && !openAIResponse.getChoices().isEmpty()) {
+                        response = openAIResponse.getChoices().get(0).getText();
+                        // Resto del código
+                    } else {
+                        this.errors.add("La respuesta de gpt viene vacia");
+                        System.out.println(promptProcessor.getResponse()); break;
+                    }
+                } else {
+                    this.errors.add("La respuesta json de gpt viene vacia");
+                    System.out.println(promptProcessor.getResponse()); break;
+                }
+                
+                Decoder decoder = new Decoder(response);
                 if(decoder.existError()){
                     this.errors.addAll(decoder.getErrors());
                     return;
