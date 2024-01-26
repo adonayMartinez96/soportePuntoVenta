@@ -3,3 +3,9 @@
 
 # Ignorar directorio de construcción de Maven
 target/
+
+#ignorar vs code
+.vscode/
+
+# Ignorar archivo de configuración .env
+.env
