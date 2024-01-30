@@ -73,7 +73,6 @@ public class DecoderMultipleOrders {
                 
                     if (openAIResponse != null && openAIResponse.getChoices() != null && !openAIResponse.getChoices().isEmpty()) {
                         response = openAIResponse.getChoices().get(0).getText();
-                        // Resto del código
                     } else {
                         this.errors.add("La respuesta de gpt viene vacia");
                         System.out.println(promptProcessor.getResponse()); break;
@@ -82,13 +81,12 @@ public class DecoderMultipleOrders {
                     this.errors.add("La respuesta json de gpt viene vacia");
                     System.out.println(promptProcessor.getResponse()); break;
                 }
-                
                 Decoder decoder = new Decoder(response);
                 if(decoder.existError()){
                     this.errors.addAll(decoder.getErrors());
                     return;
                 }
-              //  this.checkRequiredKeys(decoder, requiredKeys);
+                this.checkRequiredKeys(decoder, requiredKeys);
                 orders.add(decoder);
             }
         }
