@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
+import Kernel.utils.Extractor;
 import Models.Customer;
 import Repositories.CustomersRepository;
 import Repositories.ProductsRepository;
@@ -64,9 +65,9 @@ public class decoderOrdersPanel {
         orders.addRequiredKey("Ciudad|ciudad");
         orders.addRequiredKey("Departamento|departamento");
         orders.addRequiredKey("Total a pagar");
-       /// orders.addRequiredKey("Envío");
+        /// orders.addRequiredKey("Envío");
         orders.addRequiredKey("Fecha de entrega");
-       // orders.addRequiredKey("productos|Productos");
+        // orders.addRequiredKey("productos|Productos");
     }
 
     public decoderOrdersPanel() {
@@ -160,8 +161,7 @@ public class decoderOrdersPanel {
             this.orders = order;
             this.headerStartOrder = orders.getHeaderStartOrder();
 
-            // este codigo solamente se ejecutara en el caso que haya errores
-
+            // Este código solamente se ejecutará en el caso que haya errores
             this.error = orders.existError();
             this.printErrors(orders.getErrors());
             this.placeComponents(this.textArea.getText());
@@ -352,6 +352,12 @@ public class decoderOrdersPanel {
         List<String> nameList = new ArrayList<>(deliveryMap.values());
         editPanel.add(new JLabel("Envios:"));
         JComboBox<String> deliveryComboBox = new JComboBox<>(nameList.toArray(new String[0]));
+        String selectedShipping = this.findClosestShipping(Extractor.getValues(deliveryMap), singleOrder.getShipping());
+        int selectedIndex = nameList.indexOf(selectedShipping);
+        if (selectedIndex != -1) {
+            deliveryComboBox.setSelectedIndex(selectedIndex);
+        }
+
         editPanel.add(deliveryComboBox);
 
         JTextField total = new JTextField(singleOrder.getTotal());
@@ -405,8 +411,8 @@ public class decoderOrdersPanel {
                 int productQuantity = Integer.parseInt(entry.getValue().getText());
                 updatedProducts.put(productName, productQuantity);
             }
-            
-            Map<String, Integer> mainMapProducts = singleOrder.getProducts(); 
+
+            Map<String, Integer> mainMapProducts = singleOrder.getProducts();
             Map<String, Integer> finalProducts = new LinkedHashMap<>(mainMapProducts);
             finalProducts.keySet().retainAll(updatedProducts.keySet());
             for (Map.Entry<String, Integer> entry : updatedProducts.entrySet()) {
@@ -414,9 +420,8 @@ public class decoderOrdersPanel {
                 Integer updatedQuantity = entry.getValue();
                 finalProducts.put(productName, updatedQuantity);
             }
-            
+
             singleOrder.editData(finalProducts);
-            
 
             String selectedDeliveryName = (String) deliveryComboBox.getSelectedItem();
             Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
@@ -466,8 +471,33 @@ public class decoderOrdersPanel {
         return productComboBox;
     }
 
-
     private double roundToTwoDecimals(double value) {
         return Math.round(value * 100.0) / 100.0;
+    }
+
+    public String findClosestShipping(List<String> nameList, String desiredValue) {
+        if (desiredValue == null || desiredValue.isEmpty() || desiredValue.equals("0") || desiredValue.equals("0.0")) {
+            return nameList.get(0); // Default to "No shipping" if desiredValue is empty
+        }
+
+        double desiredAmount = Double.parseDouble(desiredValue);
+
+        double minDifference = Double.MAX_VALUE;
+        String closestShipping = null;
+
+        for (String shippingName : nameList) {
+            String shippingValue = shippingName.replaceAll("[^\\d.]+", "");
+            if (!shippingValue.isEmpty()) {
+                double shippingAmount = Double.parseDouble(shippingValue);
+                double difference = Math.abs(desiredAmount - shippingAmount);
+
+                if (difference < minDifference) {
+                    minDifference = difference;
+                    closestShipping = shippingName;
+                }
+            }
+        }
+
+        return closestShipping;
     }
 }
