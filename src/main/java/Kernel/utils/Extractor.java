@@ -32,4 +32,9 @@ public class Extractor {
 
         return extractedValues;
     }
+
+
+    public static <K, V> List<V> getValues(Map<K, V> map) {
+        return new ArrayList<>(map.values());
+    }
 }
