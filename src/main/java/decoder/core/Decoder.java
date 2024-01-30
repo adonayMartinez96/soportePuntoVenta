@@ -16,7 +16,7 @@ public class Decoder {
 
 
     private Map<Integer, String> delivery;
-
+    private Map<Integer, String> typeOrder;
 
     private List<String> errors;
 
@@ -30,6 +30,7 @@ public class Decoder {
         this.totalToPay = Double.parseDouble(this.getTotal());
         this.shipmentCost = Double.parseDouble(this.getShipping());
         this.totalAmountProducts = this.totalToPay - this.shipmentCost;
+        this.typeOrder = new LinkedHashMap<>();
     }
 
     public String getStringData(){
@@ -235,6 +236,10 @@ public class Decoder {
         data.put(translatedKey.toLowerCase(), value);
     }
 
+    public String getTypeOrder(){
+        return this.getValue("tipo");
+    }
+
     public void editData(Map<String, Integer> newMap) {
         this.products = newMap;
     }
@@ -244,9 +249,26 @@ public class Decoder {
         this.delivery.put(id, name);
     }
 
+    public void setTypeOrder(Integer id, String name){
+        this.typeOrder.put(id, name);
+    }
+
 
     public Map<Integer, String> getDelivery(){
         return this.delivery;
+    }
+
+    public Map<Integer, String> getTypeOrderIdAndName(){
+        return this.typeOrder;
+    }
+
+    public Integer getIdOrderType(){
+        if (!delivery.isEmpty()) {
+            Map.Entry<Integer, String> firstEntry = this.typeOrder.entrySet().iterator().next();
+            return firstEntry.getKey();
+        } else {
+            return -1;
+        }
     }
 
     public Boolean existDelivery(){
