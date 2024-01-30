@@ -13,8 +13,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import Kernel.utils.Extractor;
+import Kernel.utils.StringSimilarityFinder;
 import Models.Customer;
 import Repositories.CustomersRepository;
+import Repositories.OrderTypeRespository;
 import Repositories.ProductsRepository;
 import Repositories.VentaDetallePlusRepository;
 
@@ -67,6 +69,7 @@ public class decoderOrdersPanel {
         orders.addRequiredKey("Total a pagar");
         /// orders.addRequiredKey("Envío");
         orders.addRequiredKey("Fecha de entrega");
+        orders.addRequiredKey("tipo|Tipo");
         // orders.addRequiredKey("productos|Productos");
     }
 
@@ -357,8 +360,20 @@ public class decoderOrdersPanel {
         if (selectedIndex != -1) {
             deliveryComboBox.setSelectedIndex(selectedIndex);
         }
-
         editPanel.add(deliveryComboBox);
+        
+        Map<Integer, String> typesOrder = OrderTypeRespository.getTypeOrderMap();
+        List<Integer> idListTypeOrders = new ArrayList<>(typesOrder.keySet());
+        List<String> nameListTypeOrders = new ArrayList<>(typesOrder.values());
+        editPanel.add(new JLabel("Tipo de orden:"));
+        JComboBox<String> typeOrdersComboBox = new JComboBox<>(nameListTypeOrders.toArray(new String[0]));
+        String selectTypeOrder = StringSimilarityFinder.findMostSimilarString(singleOrder.getTypeOrder(), nameListTypeOrders);
+        int selectedTypeOrderIndex = nameListTypeOrders.indexOf(selectTypeOrder);
+        if(selectedTypeOrderIndex != -1){
+            typeOrdersComboBox.setSelectedIndex(selectedTypeOrderIndex);
+        }
+        editPanel.add(typeOrdersComboBox);
+        
 
         JTextField total = new JTextField(singleOrder.getTotal());
         editPanel.add(new JLabel("Total a pagar:"));
@@ -426,6 +441,13 @@ public class decoderOrdersPanel {
             String selectedDeliveryName = (String) deliveryComboBox.getSelectedItem();
             Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
             singleOrder.setDelivery(selectedDeliveryId, selectedDeliveryName);
+
+
+            String selectedTypeOrderName = (String) typeOrdersComboBox.getSelectedItem();
+            Integer selectedTypeOrderId = idListTypeOrders.get(nameListTypeOrders.indexOf(selectedTypeOrderName));
+            singleOrder.setTypeOrder(selectedTypeOrderId, selectedTypeOrderName);
+            
+            
 
             this.updateTextArea(); // ver esa cosa que esta haciendo bugs :c
             editFrame.dispose();

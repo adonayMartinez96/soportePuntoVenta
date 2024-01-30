@@ -14,7 +14,7 @@ import Kernel.Respository.Insert;
 
 public class OrdersRepository {
 
-    public static Map<String, Object> insertOrder(String address, String reference, String nameClient, String phone) {
+    public static Map<String, Object> insertOrder(String address, String reference, String nameClient, String phone, Integer idOrderType) {
         Map<String, Object> result = new HashMap<>();
         Integer lastInsertedId = 0;
 
@@ -31,7 +31,7 @@ public class OrdersRepository {
             insert.setColumn("idcajero", "3");
             insert.setColumn("tipo_propina", "1");
             insert.setColumn("valor_propina", "0,00");
-            insert.setColumn("id_Ordertype", "1");
+            insert.setColumn("id_Ordertype", idOrderType, true); // es el tipo de orden
             insert.setColumn("precuentas_prints", "0");
             insert.setColumn("Cliente_temporal", "");
             insert.setColumn("idcliente", 1);

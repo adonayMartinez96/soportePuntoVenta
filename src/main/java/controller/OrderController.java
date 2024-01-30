@@ -168,7 +168,8 @@ public class OrderController {
                 this.data.getAddress().get("address"),
                 this.data.getAddress().get("reference"),
                 this.data.getName(),
-                this.data.getPhone());
+                this.data.getPhone(),
+                this.data.getIdOrderType());
     }
 
     private List<Map<String, Object>> insertSaleProduct() {
