@@ -37,6 +37,7 @@ public class PromptProcessorGpt {
                 .append("Envío: [Envío]")
                 .append("Fecha de entrega: [Fecha de entrega]")
                 .append("Comentario: [Comentario]")
+                .append("tipo: [Tipo]")
                 .toString());
     }
 
