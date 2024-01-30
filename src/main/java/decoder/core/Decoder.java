@@ -41,19 +41,16 @@ public class Decoder {
                 .replaceAll("\\p{M}", "").toLowerCase();
     }
 
+    public String sanitize(String input){
+        return input.replaceAll("^\\s*|\\s*$", "");
+    }
+
     private void decodeData(String input) {
-        System.out.println("ESTO ES EL INPUTT: ");
-        System.out.println(input.trim());
-        String[] lines = input.trim().split("\\n");
+        String[] lines = this.sanitize(input).split("\\n");
         boolean productosKeyFound = false;
     
         for (int count = 0; count < lines.length; count++) {
             String line = lines[count];
-    
-            // Se obvia la primer alinea por que es un encabezado nada mas
-            if (count == 0) {
-                continue;
-            }
     
             String[] parts = line.split(":", 2);
     
@@ -66,8 +63,10 @@ public class Decoder {
             String value = parts[1].trim();
     
             if (key.isEmpty() || value.isEmpty()) {
-                this.errors.add("Error en línea " + count + ": '" + line + "'. La clave o el valor están vacíos.");
-                continue;
+                if(!key.equals("envio")){ //esto sifnigica que chat gpt puso el envio pero nulo por que en el input no pusieron envio
+                    this.errors.add("Error en línea " + count + ": '" + line + "'. La clave o el valor están vacíos.");
+                    continue;
+                }
             }
     
             if (key.startsWith("productos")) {
@@ -85,6 +84,8 @@ public class Decoder {
         if (!productosKeyFound) {
             this.errors.add("No se encontró la clave 'productos'. Corrija y vuelva a intentarlo.");
         }
+
+        System.out.println(this.data);
     }
     
     
