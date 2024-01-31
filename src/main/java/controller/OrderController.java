@@ -39,12 +39,18 @@ public class OrderController {
         if (this.isNew) {
             this.addressSaveId = this.getIdAddressProcessed();
         }
+
+
+        /* 
+         * 
+         * Todo esto no por que tiene fallos xd
+         */
         // esto por que la orden puede devolver un string o un int
-        Map<String, Object> order = this.insertOrder();
+       /*  Map<String, Object> order = this.insertOrder();
         this.orderIdInsert = (int) order.get("id");
         this.orderDateInsert = (String) order.get("date");
         this.dataInsertSaleProduct = this.insertSaleProduct();
-        this.insertsIdsSalesProductsInsert = VentaDetallePlusRepository.extractInsertIds(this.dataInsertSaleProduct);
+        this.insertsIdsSalesProductsInsert = VentaDetallePlusRepository.extractInsertIds(this.dataInsertSaleProduct); */
 
 
         /* 
@@ -53,14 +59,14 @@ public class OrderController {
          * 
          * 1, 2, 3
          */
-        this.sequenceIdsInsertSale = VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleProduct);
+     /*    this.sequenceIdsInsertSale = VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleProduct);
         this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleProduct);
 
         System.out.println("esto es el ultimo: " + this.lastSequeceNumberInsertSale);
         System.out.println(this.dataInsertSaleComment);
         System.out.println(this.sequenceIdsInsertSale);
 
-        this.dataInsertSaleComment = this.insertSaleComment();
+        this.dataInsertSaleComment = this.insertSaleComment(); */
 
         /* 
          * Aca se deberia hacer un merge entre lo que tenia antes this.sequenceIdsInsertSale y lo que se extraera, quedaria algo como
@@ -77,7 +83,7 @@ public class OrderController {
          * si no hay nada de comentarios para insertar, pues  this.dataInsertSaleComment tendra una lista vacia y
          * no se hara el merge
          */
-        this.sequenceIdsInsertSale.addAll(VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleComment));
+       /*  this.sequenceIdsInsertSale.addAll(VentaDetallePlusRepository.extractInsertIdsSequence(this.dataInsertSaleComment));
         this.lastSequeceNumberInsertSale = VentaDetallePlusRepository.extractInsertLastSequence(this.dataInsertSaleComment);
 
         System.out.println("esto es el ultimo: " + this.lastSequeceNumberInsertSale);
@@ -98,7 +104,7 @@ public class OrderController {
 
        
         System.out.println("Id de orden insertado: " +  this.orderIdInsert);
-        System.out.println("Fecha: " + this.orderDateInsert);
+        System.out.println("Fecha: " + this.orderDateInsert); */
 
     }
 
