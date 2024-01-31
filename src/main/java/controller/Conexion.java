@@ -50,7 +50,7 @@ public class Conexion {
                     break;
             }
         }
-        url = "jdbc:mysql://" + host + ":" + port + "/impadi";
+        url = "jdbc:mysql://" + host + ":" + port;
     }
 
     public static String getRuteFileExcel(){
