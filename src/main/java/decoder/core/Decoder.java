@@ -29,7 +29,7 @@ public class Decoder {
         this.decodeData(input);
         this.totalToPay = Double.parseDouble(this.getTotal());
         this.shipmentCost = Double.parseDouble(this.getShipping());
-        this.totalAmountProducts = this.totalToPay - this.shipmentCost;
+        this.totalAmountProducts = this.totalToPay; //esto es el total del productos
         this.typeOrder = new LinkedHashMap<>();
     }
 
@@ -182,7 +182,7 @@ public class Decoder {
     }
 
     public double getUnitPrice() {
-        return this.totalAmountProducts / this.getAmountProducts();
+        return this.totalAmountProducts + this.shipmentCost / this.getAmountProducts();
     }
 
     public String getComment() {
