@@ -66,7 +66,7 @@ public class decoderOrdersPanel {
         orders.addRequiredKey("Nombre|nombre");
         orders.addRequiredKey("Ciudad|ciudad");
         orders.addRequiredKey("Departamento|departamento");
-        orders.addRequiredKey("Total a pagar");
+        // orders.addRequiredKey("Total producto");
         /// orders.addRequiredKey("Envío");
         orders.addRequiredKey("Fecha de entrega");
         orders.addRequiredKey("tipo|Tipo");
@@ -120,7 +120,6 @@ public class decoderOrdersPanel {
         scanButton.setEnabled(enable);
         scanButton.addActionListener(e -> {
             System.out.println("se preciono el scaneo");
-            // Aquí colocas la lógica que deseas ejecutar al presionar el botón "Scanear"
             String text = this.textArea.getText();
             // Realiza lo que necesites con el texto del JTextArea
             /* System.out.println("Texto ingresado: " + text); */
@@ -320,7 +319,7 @@ public class decoderOrdersPanel {
         editPanel.add(exactAddressField);
 
         JTextField totalAmountField = new JTextField(singleOrder.getTotal());
-        editPanel.add(new JLabel("Total productos:"));
+        editPanel.add(new JLabel("Total producto:"));
         editPanel.add(totalAmountField);
 
         /*
@@ -361,37 +360,44 @@ public class decoderOrdersPanel {
             deliveryComboBox.setSelectedIndex(selectedIndex);
         }
         editPanel.add(deliveryComboBox);
-        
+
         Map<Integer, String> typesOrder = OrderTypeRespository.getTypeOrderMap();
         List<Integer> idListTypeOrders = new ArrayList<>(typesOrder.keySet());
         List<String> nameListTypeOrders = new ArrayList<>(typesOrder.values());
         editPanel.add(new JLabel("Tipo de orden:"));
         JComboBox<String> typeOrdersComboBox = new JComboBox<>(nameListTypeOrders.toArray(new String[0]));
-        String selectTypeOrder = StringSimilarityFinder.findMostSimilarString(singleOrder.getTypeOrder(), nameListTypeOrders);
+        String selectTypeOrder = StringSimilarityFinder.findMostSimilarString(singleOrder.getTypeOrder(),
+                nameListTypeOrders);
         int selectedTypeOrderIndex = nameListTypeOrders.indexOf(selectTypeOrder);
-        if(selectedTypeOrderIndex != -1){
+        if (selectedTypeOrderIndex != -1) {
             typeOrdersComboBox.setSelectedIndex(selectedTypeOrderIndex);
         }
         editPanel.add(typeOrdersComboBox);
-        
 
-        JTextField total = new JTextField(singleOrder.getTotal());
+        final String[] selectedDeliveryNameChange = { (String) deliveryComboBox.getSelectedItem() };
+        final Integer[] selectedDeliveryIdChange = { idList.get(nameList.indexOf(selectedDeliveryNameChange[0])) };
+        final double[] deliveryPrice = {
+                Double.parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0])) };
+
+        // Inicializar el JTextField con el total inicial
+        double initialTotal = Double.parseDouble(singleOrder.getTotal());
+        JTextField total = new JTextField(String.valueOf(roundToTwoDecimals(initialTotal + deliveryPrice[0])));
         editPanel.add(new JLabel("Total a pagar:"));
         editPanel.add(total);
 
         deliveryComboBox.addActionListener(e -> {
-            String selectedDeliveryName = (String) deliveryComboBox.getSelectedItem();
-            Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
-            double deliveryPrice = Double
-                    .parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryId));
+            // Utilizar la variable final
+            selectedDeliveryNameChange[0] = (String) deliveryComboBox.getSelectedItem();
+            selectedDeliveryIdChange[0] = idList.get(nameList.indexOf(selectedDeliveryNameChange[0]));
+            deliveryPrice[0] = Double
+                    .parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0]));
             double currentTotal = Double.parseDouble(singleOrder.getTotal());
-            double newTotal = deliveryPrice + currentTotal;
+            double newTotal = roundToTwoDecimals(currentTotal + deliveryPrice[0]);
 
-            // Redondear a dos decimales utilizando Math.round
-            newTotal = roundToTwoDecimals(newTotal);
-
+            // Actualizar el JTextField con el nuevo total
             total.setText(String.valueOf(newTotal));
         });
+
         JButton saveButton = new JButton("Guardar");
         saveButton.addActionListener(e -> {
             /*
@@ -442,12 +448,9 @@ public class decoderOrdersPanel {
             Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
             singleOrder.setDelivery(selectedDeliveryId, selectedDeliveryName);
 
-
             String selectedTypeOrderName = (String) typeOrdersComboBox.getSelectedItem();
             Integer selectedTypeOrderId = idListTypeOrders.get(nameListTypeOrders.indexOf(selectedTypeOrderName));
             singleOrder.setTypeOrder(selectedTypeOrderId, selectedTypeOrderName);
-            
-            
 
             this.updateTextArea(); // ver esa cosa que esta haciendo bugs :c
             editFrame.dispose();

@@ -33,7 +33,7 @@ public class PromptProcessorGpt {
                 .append("Departamento: [Departamento]")
                 .append("Referencia: [Referencia]")
                 .append("Productos: [Productos]")
-                .append("Total a pagar: [Total a pagar]")
+                .append("Total producto: [Total producto]")
                 .append("Envío: [Envío]")
                 .append("Fecha de entrega: [Fecha de entrega]")
                 .append("Comentario: [Comentario]")
