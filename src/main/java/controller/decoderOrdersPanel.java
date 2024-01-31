@@ -1,6 +1,7 @@
 package controller;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -172,10 +173,11 @@ public class decoderOrdersPanel {
 
     public void printDebug() {
         for (Decoder order : this.orders) {
-            System.out.println("Nombre: " + order.getName());
-            System.out.println("Dirección: " + order.getAllAddress());
-            System.out.println("Teléfono: " + order.getPhone());
 
+
+            for(Map.Entry<String, String> entry : order.getData().entrySet()){
+                System.out.println(entry.getKey() + " => " + entry.getValue());
+            }
             Map<String, Integer> products = order.getProducts();
 
             if (products.isEmpty()) {
@@ -191,6 +193,16 @@ public class decoderOrdersPanel {
                 }
             }
             System.out.println();
+
+            for(Map.Entry<Integer, String> entry : order.getDelivery().entrySet()){
+                System.out.println(entry.getKey() + " => " + entry.getValue());
+            }
+
+            for(Map.Entry<Integer, String> entry : order.getTypeOrderIdAndName().entrySet()){
+                System.out.println(entry.getKey() + " => " + entry.getValue());
+            }
+
+
         }
     }
 
