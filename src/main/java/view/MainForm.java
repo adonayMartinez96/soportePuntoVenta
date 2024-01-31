@@ -191,6 +191,7 @@ public class MainForm extends JFrame {
     public static void main(String [] args){
        // excelFile = args[0];
         Conexion.main(args);
+        MainForm.excelFile = Conexion.getRuteFileExcel();
         new MainForm();
     }
 

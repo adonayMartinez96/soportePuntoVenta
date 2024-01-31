@@ -16,6 +16,8 @@ public class Conexion {
     public static String port = "";
     public static String host = "";
 
+    public static String ruteFileExcel = "";
+
     // ESTADO: PRODUCCIOn
     // UAT
     // private static final String user = "root";
@@ -41,11 +43,18 @@ public class Conexion {
                 case "-p":
                     pass = args[++i];
                     break;
+                case "-e":
+                    ruteFileExcel = args[++i];
+                    break;
                 default:
                     break;
             }
         }
         url = "jdbc:mysql://" + host + ":" + port + "/impadi";
+    }
+
+    public static String getRuteFileExcel(){
+        return ruteFileExcel;
     }
     
 
