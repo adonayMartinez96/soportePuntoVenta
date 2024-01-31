@@ -62,12 +62,20 @@ public class Decoder {
     
             String key = this.normalizeString(parts[0].trim());
             String value = parts[1].trim();
+
+            if(key.equals("comentario")){
+                value = "-";
+            }
+
     
             if (key.isEmpty() || value.isEmpty()) {
+
+
                 if(!key.equals("envio")){ //esto sifnigica que chat gpt puso el envio pero nulo por que en el input no pusieron envio
                     this.errors.add("Error en línea " + count + ": '" + line + "'. La clave o el valor están vacíos.");
                     continue;
                 }
+
             }
     
             if (key.startsWith("productos")) {
@@ -322,7 +330,7 @@ public class Decoder {
             case "shipping":
                 return "envio";
             case "total":
-                return "total a pagar";
+                return "total producto";
             case "delivery date":
                 return "fecha de entrega";
             case "salesperson":

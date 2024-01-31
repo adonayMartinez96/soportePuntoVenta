@@ -12,7 +12,7 @@ import controller.Conexion;
 public class OrderTypeRespository {
 
     public static Map<Integer, String> getTypeOrderMap() {
-        String query = "select id, nombre from silverpos.tipo_orden  where activo = 1 and length(nombre) > 1;";
+        String query = "select id, nombre  from silverpos.tipo_orden where id  in (1,5);";
         Map<Integer, String> resultMap = new HashMap<>();
 
         try (Connection connection = Conexion.conectarS();
