@@ -376,8 +376,12 @@ public class decoderOrdersPanel {
 
         final String[] selectedDeliveryNameChange = { (String) deliveryComboBox.getSelectedItem() };
         final Integer[] selectedDeliveryIdChange = { idList.get(nameList.indexOf(selectedDeliveryNameChange[0])) };
-        final double[] deliveryPrice = {
-                Double.parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0])) };
+
+        double price = 0.0;
+        if(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0]) != null){
+            price = Double.parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0]));
+        }
+        final double[] deliveryPrice = { price };
 
         // Inicializar el JTextField con el total inicial
         double initialTotal = Double.parseDouble(singleOrder.getTotal());
