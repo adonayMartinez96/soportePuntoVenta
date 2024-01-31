@@ -6,8 +6,23 @@ public class Config {
     private static final Dotenv dotenv = Dotenv.configure().load();
 
     public static String getApiKeyOpenIA() {
-        return dotenv.get("API_KEY_OPENIA");
+        return dotenv.get("API_KEY_OPEN_IA");
     }
 
-    
+    public static String getHostDataBase(){
+        return dotenv.get("DB_HOST");
+    }
+
+    public static String getUserDataBase(){
+        return dotenv.get("DB_USERNAME");
+    }
+
+    public static String getPasswordDataBase(){
+        return dotenv.get("DB_PASSWORD");
+    }
+
+    public static String getPortDataBase(){
+        return dotenv.get("DB_PORT");
+    }
+
 }
