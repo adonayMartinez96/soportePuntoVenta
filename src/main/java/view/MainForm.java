@@ -177,7 +177,7 @@ public class MainForm extends JFrame {
         agregarOrdenesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //System.out.println("Holazd");
+                System.out.println("Holazd");
                 decoderOrdersPanel panel = new decoderOrdersPanel();
                 panel.run();
                 System.out.printf("cliqueado");

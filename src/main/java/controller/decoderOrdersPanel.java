@@ -12,6 +12,8 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
 
 import Kernel.utils.Extractor;
 import Kernel.utils.StringSimilarityFinder;
@@ -27,6 +29,8 @@ import java.awt.Toolkit;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Component;
+
 
 import decoder.core.DecoderMultipleOrders;
 import decoder.core.EncoderMultipleOrders;
@@ -56,6 +60,9 @@ public class decoderOrdersPanel {
 
     // todo el panel
     JFrame frame;
+
+    // scaan se activo?
+    private boolean scanned = false;
 
     /*
      * en esta funcion se definen los key que son requeridos, si el decoder
@@ -103,7 +110,6 @@ public class decoderOrdersPanel {
         this.textArea.setText(textArea);
 
         JScrollPane scrollPane = new JScrollPane(this.textArea);
-        /* scrollPane.setBounds(10, 10, 260, 100); */
         int textAreaWidth = this.screenWidth - 80;
         int textAreaHeight = this.screenHeight - 200;
         scrollPane.setBounds(10, 10, textAreaWidth, textAreaHeight);
@@ -111,8 +117,7 @@ public class decoderOrdersPanel {
         this.panel.add(scrollPane);
 
         this.buttonScann(textAreaHeight, !this.error);
-        this.buttonSave(textAreaHeight, !this.error);
-
+        this.buttonSave(textAreaHeight, !this.error); // Llamamos directamente al método
     }
 
     private void buttonScann(int textAreaHeight, boolean enable) {
@@ -122,13 +127,12 @@ public class decoderOrdersPanel {
         scanButton.addActionListener(e -> {
             System.out.println("se preciono el scaneo");
             String text = this.textArea.getText();
-            // Realiza lo que necesites con el texto del JTextArea
-            /* System.out.println("Texto ingresado: " + text); */
+            this.scanned = true;
             this.decodeText(text);
             if (!this.error) {
                 this.runPanelEdit();
             }
-
+            this.updateSaveButtonState();
         });
         this.panel.add(scanButton);
     }
@@ -136,7 +140,7 @@ public class decoderOrdersPanel {
     private void buttonSave(int textAreaHeight, boolean enable) {
         JButton save = new JButton("Guardar");
         save.setBounds(120, textAreaHeight + 20, 80, 25);
-        save.setEnabled(enable);
+        save.setEnabled(enable && this.scanned);
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
@@ -147,8 +151,24 @@ public class decoderOrdersPanel {
                 this.frame.dispose();
             }
 
+            this.updateSaveButtonState();
         });
         this.panel.add(save);
+    }
+
+    private void updateSaveButtonState() {
+        SwingUtilities.invokeLater(() -> {
+            boolean saveButtonEnableState = !this.error && this.scanned;
+            Component[] components = this.panel.getComponents();
+            for (Component component : components) {
+                if (component instanceof JButton) {
+                    JButton button = (JButton) component;
+                    if (button.getText().equals("Guardar")) {
+                        button.setEnabled(saveButtonEnableState);
+                    }
+                }
+            }
+        });
     }
 
     private void updateTextArea() {
@@ -174,8 +194,7 @@ public class decoderOrdersPanel {
     public void printDebug() {
         for (Decoder order : this.orders) {
 
-
-            for(Map.Entry<String, String> entry : order.getData().entrySet()){
+            for (Map.Entry<String, String> entry : order.getData().entrySet()) {
                 System.out.println(entry.getKey() + " => " + entry.getValue());
             }
             Map<String, Integer> products = order.getProducts();
@@ -194,14 +213,13 @@ public class decoderOrdersPanel {
             }
             System.out.println();
 
-            for(Map.Entry<Integer, String> entry : order.getDelivery().entrySet()){
+            for (Map.Entry<Integer, String> entry : order.getDelivery().entrySet()) {
                 System.out.println(entry.getKey() + " => " + entry.getValue());
             }
 
-            for(Map.Entry<Integer, String> entry : order.getTypeOrderIdAndName().entrySet()){
+            for (Map.Entry<Integer, String> entry : order.getTypeOrderIdAndName().entrySet()) {
                 System.out.println(entry.getKey() + " => " + entry.getValue());
             }
-
 
         }
     }
@@ -390,13 +408,14 @@ public class decoderOrdersPanel {
         final Integer[] selectedDeliveryIdChange = { idList.get(nameList.indexOf(selectedDeliveryNameChange[0])) };
 
         double price = 0.0;
-        if(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0]) != null){
+        if (VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0]) != null) {
             price = Double.parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0]));
         }
         final double[] deliveryPrice = { price };
 
         // Inicializar el JTextField con el total inicial
         double initialTotal = Double.parseDouble(singleOrder.getTotal());
+        singleOrder.setTotalToPay(roundToTwoDecimals(initialTotal + deliveryPrice[0]));
         JTextField total = new JTextField(String.valueOf(roundToTwoDecimals(initialTotal + deliveryPrice[0])));
         editPanel.add(new JLabel("Total a pagar:"));
         editPanel.add(total);
@@ -409,7 +428,7 @@ public class decoderOrdersPanel {
                     .parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0]));
             double currentTotal = Double.parseDouble(singleOrder.getTotal());
             double newTotal = roundToTwoDecimals(currentTotal + deliveryPrice[0]);
-
+            singleOrder.setTotalToPay(newTotal);
             // Actualizar el JTextField con el nuevo total
             total.setText(String.valueOf(newTotal));
         });
