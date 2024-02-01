@@ -14,7 +14,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-
 import Kernel.utils.Extractor;
 import Kernel.utils.StringSimilarityFinder;
 import Models.Customer;
@@ -30,7 +29,6 @@ import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.Component;
-
 
 import decoder.core.DecoderMultipleOrders;
 import decoder.core.EncoderMultipleOrders;
@@ -289,6 +287,12 @@ public class decoderOrdersPanel {
                 isNew = true;
             } else {
                 System.out.println("\n listo para insertar\n");
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Se registrará al cliente " + singleOrder.getName()
+                                + " como un nuevo cliente. Número de teléfono: " + singleOrder.getPhone(),
+                        "Registro de Cliente Nuevo",
+                        JOptionPane.INFORMATION_MESSAGE);
                 idCliente = insert.insertCustomer(singleOrder.getName(), singleOrder.getPhone());
                 idInsertIfClientNotExists = insertAddress.insertAddressClient(
                         idCliente,
