@@ -1,7 +1,6 @@
 package controller;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -142,6 +141,7 @@ public class decoderOrdersPanel {
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
+            printDebug();
 
             if (!this.error) {
                 this.save();
@@ -191,35 +191,38 @@ public class decoderOrdersPanel {
 
     public void printDebug() {
         for (Decoder order : this.orders) {
-
+            System.out.println("Datos del pedido:");
             for (Map.Entry<String, String> entry : order.getData().entrySet()) {
-                System.out.println(entry.getKey() + " => " + entry.getValue());
+                System.out.println("  " + entry.getKey() + " => " + entry.getValue());
             }
-            Map<String, Integer> products = order.getProducts();
 
+            Map<String, Integer> products = order.getProducts();
             if (products.isEmpty()) {
                 System.out.println("No hay productos en este pedido.");
             } else {
                 System.out.println("Productos en el pedido:");
-
                 for (Map.Entry<String, Integer> productEntry : products.entrySet()) {
                     String productName = productEntry.getKey();
                     int quantity = productEntry.getValue();
-
-                    System.out.println("   - Producto: " + productName + ", Cantidad: " + quantity);
+                    System.out.println("  - Producto: " + productName + ", Cantidad: " + quantity);
                 }
             }
-            System.out.println();
 
+            System.out.println("Detalles de entrega:");
+            System.out.println(String.format("%-5s %-20s", "ID", "Tipo/nombre"));
             for (Map.Entry<Integer, String> entry : order.getDelivery().entrySet()) {
-                System.out.println(entry.getKey() + " => " + entry.getValue());
+                System.out.println(String.format("%-5s %-20s", entry.getKey(), entry.getValue()));
             }
-
+            System.out.println("");
+            System.out.println("Tipos de pedido y nombres:");
+            System.out.println(String.format("%-5s %-15s", "ID", "Tipo"));
             for (Map.Entry<Integer, String> entry : order.getTypeOrderIdAndName().entrySet()) {
-                System.out.println(entry.getKey() + " => " + entry.getValue());
+                System.out.println(String.format("%-5s %-15s", entry.getKey(), entry.getValue()));
             }
 
+            System.out.println("=====================================");
         }
+        System.exit(0);
     }
 
     public void printErrors(List<String> errors) {
@@ -437,7 +440,7 @@ public class decoderOrdersPanel {
             total.setText(String.valueOf(newTotal));
         });
 
-        JButton saveButton = new JButton("Guardar");
+        JButton saveButton = new JButton("Siguiente");
         saveButton.addActionListener(e -> {
             /*
              * Aca editar cada una de las cosas, por el momento solamente se pueden editar
@@ -493,6 +496,36 @@ public class decoderOrdersPanel {
 
             this.updateTextArea(); // ver esa cosa que esta haciendo bugs :c
             editFrame.dispose();
+
+
+
+
+            StringBuilder message = new StringBuilder("Guardar los siguientes cambios:\n\n");
+            message.append("Nombre: ").append(singleOrder.getName()).append("\n");
+            message.append("Teléfono: ").append(singleOrder.getPhone()).append("\n");
+            message.append("Ciudad/Departamento: ").append(singleOrder.getCity()).append("\n"); // Usar el valor actualizado
+            message.append("Dirección exacta: ").append(singleOrder.getAllAddress()).append("\n"); // Usar el valor actualizado
+            message.append("Total de productos: ").append(singleOrder.getTotal()).append("\n"); // Usar el valor actualizado
+            message.append("Fecha de entrega: ").append(singleOrder.getDeliveryDate()).append("\n"); // Usar el valor actualizado
+            message.append("Tipo de orden: ").append(singleOrder.getTypeOrder()).append("\n");
+            message.append("Envío: ").append(singleOrder.getNameDelivery()).append("\n");
+        
+            Map<String, Integer> products = singleOrder.getProducts();
+            for (Map.Entry<String, Integer> entry : products.entrySet()) {
+                message.append("Producto: ").append(entry.getKey()).append(", Cantidad: ").append(entry.getValue()).append("\n");
+            }
+
+
+
+            int option = JOptionPane.showConfirmDialog(editFrame, message.toString(), "Confirmación",
+            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+            if (option == JOptionPane.YES_OPTION) {
+                this.updateTextArea();
+                editFrame.dispose();
+                runPanelEditRecursive(currentIndex + 1, totalOrders);
+            }
+
 
             runPanelEditRecursive(currentIndex + 1, totalOrders);
 
