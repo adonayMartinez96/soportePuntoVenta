@@ -9,14 +9,10 @@ public class Decoder {
     private Map<String, Integer> products;
 
     private double totalAmountProducts;
-
-
     private double totalToPay;
     private double shipmentCost;
 
     private String inputString;
-
-
 
 
     private Map<Integer, String> delivery;
@@ -31,15 +27,10 @@ public class Decoder {
         this.data = new LinkedHashMap<>();
         this.products = new LinkedHashMap<>();
         this.decodeData(input);
-/*         this.totalToPay = Double.parseDouble(this.getTotal()); */
         this.shipmentCost = Double.parseDouble(this.getShipping());
+        this.totalToPay = Double.parseDouble(this.getTotal()) + this.shipmentCost;
         this.totalAmountProducts = Double.parseDouble(this.getTotal()); //esto es el total del productos
         this.typeOrder = new LinkedHashMap<>();
-    }
-
-
-    public void setTotalToPay(Double totalToPay){
-        this.totalToPay = totalToPay;
     }
 
     public String getStringData(){
@@ -319,6 +310,10 @@ public class Decoder {
             System.err.println("Error al convertir a double: " + input);
             return 0.0;
         }
+    }
+
+    public void setTotalToPay(double newTotal){
+        this.totalToPay = newTotal;
     }
     
 

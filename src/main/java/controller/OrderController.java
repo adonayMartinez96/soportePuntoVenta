@@ -33,6 +33,7 @@ public class OrderController {
     public Integer lastSequeceNumberInsertSale;
 
     public OrderController(int idClient, Decoder data, boolean isNew) {
+        VentaDetallePlusRepository.setDecoderData(data);
         this.idClient = idClient;
         this.data = data;
         this.isNew = isNew;
@@ -186,7 +187,6 @@ public class OrderController {
     
             if (idProduct != -1) {
                 String productName = ProductsRepository.getProductNameById(idProduct);
-    
                 List<Map<String, Object>> currentData = VentaDetallePlusRepository.insertMultiplesSales(
                         idProduct,
                         this.data.getUnitPrice(),
