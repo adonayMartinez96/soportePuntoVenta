@@ -61,6 +61,9 @@ public class decoderOrdersPanel {
     // scaan se activo?
     private boolean scanned = false;
 
+
+    boolean wasDeleteOrder = false;
+
     /*
      * en esta funcion se definen los key que son requeridos, si el decoder
      * no encuentra uno de estos keys dara un error, se pueden empezar a definir
@@ -141,7 +144,7 @@ public class decoderOrdersPanel {
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
-            // printDebug();
+             printDebug();
 
             if (!this.error) {
                 this.save();
@@ -174,7 +177,7 @@ public class decoderOrdersPanel {
     }
 
     public void decodeText(String text) {
-        if (this.orders.size() == 0) {
+        if (this.orders.size() == 0 && !this.wasDeleteOrder) {
             DecoderMultipleOrders orders = new DecoderMultipleOrders(text);
             this.requiredKeys(orders);
             orders.decode();
@@ -314,11 +317,11 @@ public class decoderOrdersPanel {
     }
 
     public void runPanelEdit() {
-        int totalOrders = this.orders.size();
-        runPanelEditRecursive(0, totalOrders);
+        runPanelEditRecursive(0);
     }
 
-    private void runPanelEditRecursive(int currentIndex, int totalOrders) {
+    private void runPanelEditRecursive(int currentIndex) {
+        int totalOrders = this.orders.size();
         if (currentIndex >= totalOrders) {
             return; // Kill al proceso si ya termino de leer todos las orders
         }
@@ -442,8 +445,8 @@ public class decoderOrdersPanel {
             total.setText(String.valueOf(newTotal));
         });
 
-        JButton saveButton = new JButton("Siguiente");
-        saveButton.addActionListener(e -> {
+        JButton nextButton = new JButton("Siguiente");
+        nextButton.addActionListener(e -> {
             /*
              * Aca editar cada una de las cosas, por el momento solamente se pueden editar
              * esos
@@ -496,23 +499,50 @@ public class decoderOrdersPanel {
             Integer selectedTypeOrderId = idListTypeOrders.get(nameListTypeOrders.indexOf(selectedTypeOrderName));
             singleOrder.setTypeOrder(selectedTypeOrderId, selectedTypeOrderName);
 
-            this.updateTextArea(); // ver esa cosa que esta haciendo bugs :c
-            editFrame.dispose();
 
             this.updateTextArea();
             editFrame.dispose();
-            runPanelEditRecursive(currentIndex + 1, totalOrders);
+            runPanelEditRecursive(currentIndex + 1);
 
         });
 
-        editPanel.add(saveButton);
+        editPanel.add(nextButton);
+
+
+        JButton cancelButton = new JButton("Cancelar orden");
+        cancelButton.setBackground(new Color(255, 200, 200));
+        cancelButton.addActionListener(e -> {
+            String orderName = singleOrder.getName();
+            int opcion = JOptionPane.showConfirmDialog(
+                null,
+                "¿Está seguro de eliminar la orden de " + orderName + "?\nEsta acción no se puede deshacer.",
+                "Confirmar eliminación",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+            );
+        
+            if (opcion == JOptionPane.YES_OPTION) {
+                this.wasDeleteOrder = true;
+                this.orders.remove(currentIndex);
+                JOptionPane.showMessageDialog(
+                    null,
+                    "La orden de " + orderName + " ha sido eliminada con éxito.",
+                    "Orden eliminada",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+            runPanelEditRecursive(currentIndex + 1);
+            editFrame.dispose();
+        });
+        
+        editPanel.add(cancelButton);
 
         editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         editFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 editFrame.dispose();
-                runPanelEditRecursive(currentIndex + 1, totalOrders);
+                runPanelEditRecursive(currentIndex + 1);
                 // handleWindowClosing(singleOrder, currentIndex, totalOrders, editFrame);
             }
         });
