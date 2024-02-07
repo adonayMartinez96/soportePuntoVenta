@@ -1,4 +1,4 @@
-package decoder.core;
+package Kernel.decoder;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.text.similarity.JaroWinklerDistance;

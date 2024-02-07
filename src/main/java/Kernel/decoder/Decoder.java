@@ -1,4 +1,4 @@
-package decoder.core;
+package  Kernel.decoder;
 
 import java.text.Normalizer;
 import java.util.*;
