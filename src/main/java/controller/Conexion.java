@@ -18,12 +18,6 @@ public class Conexion {
 
     public static String ruteFileExcel = "";
 
-    // ESTADO: PRODUCCIOn
-    // UAT
-    // private static final String user = "root";
-    // private static final String pass = "alianza96";
-    // private static final String url = "jdbc:mysql://localhost/impadi";
-
     public static void main(String[] args) {
         host = Config.getHostDataBase();
         port = Config.getPortDataBase();
@@ -63,13 +57,12 @@ public class Conexion {
     }
 
     public static Connection conectarS() {
-        System.out.println("parametros: " + user + " " + pass + " " + url);
         con = null;
         try {
             con = DriverManager.getConnection(url, user, pass);
-            System.out.println("conectado");
-            if (con != null) {
-                System.out.println("conexion establecida");
+            if (con == null) {
+                System.err.println("Error en la conexion de la base de datos");
+                System.out.println("parametros: " + user + " " + pass + " " + url);
             }
         } catch (SQLException e) {
             e.printStackTrace();
