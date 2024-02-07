@@ -12,7 +12,7 @@ import Repositories.ClientesDireccionesDomiciliosRepository;
 import Repositories.OrdersRepository;
 import Repositories.ProductsRepository;
 import Repositories.VentaDetallePlusRepository;
-import decoder.core.Decoder;
+import Kernel.decoder.Decoder;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
 public class OrderController {

@@ -1,7 +1,7 @@
 package Repositories;
 
 import controller.Conexion;
-import decoder.core.Decoder;
+import Kernel.decoder.Decoder;
 import Kernel.Respository.CustomPreparedStatement;
 import Kernel.Respository.Insert;
 import Kernel.utils.Extractor;
