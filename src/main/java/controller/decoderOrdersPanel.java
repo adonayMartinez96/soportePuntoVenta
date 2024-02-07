@@ -141,7 +141,7 @@ public class decoderOrdersPanel {
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
-           // printDebug();
+            // printDebug();
 
             if (!this.error) {
                 this.save();
@@ -324,8 +324,10 @@ public class decoderOrdersPanel {
         }
 
         Decoder singleOrder = this.orders.get(currentIndex);
-        JFrame editFrame = new JFrame(
-                "Scaneando pedido " + (currentIndex + 1) + " de " + totalOrders + " (" + singleOrder.getName() + ")");
+        JFrame editFrame = new JFrame();
+        editFrame.setTitle("Escaneando Pedido " + (currentIndex + 1) + " de " + totalOrders);
+        editFrame.setTitle(editFrame.getTitle() + " (" + singleOrder.getName() + ") ");
+        editFrame.setTitle(editFrame.getTitle() + this.getTypeOrderByInputTypeOrder(singleOrder.getTypeOrder()));
         editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         editFrame.setSize(this.screenWidth - 200, this.screenHeight - 300);
         editFrame.setLocationRelativeTo(null);
@@ -497,36 +499,8 @@ public class decoderOrdersPanel {
             this.updateTextArea(); // ver esa cosa que esta haciendo bugs :c
             editFrame.dispose();
 
-
-
-
-            StringBuilder message = new StringBuilder("Guardar los siguientes cambios:\n\n");
-            message.append("Nombre: ").append(singleOrder.getName()).append("\n");
-            message.append("Teléfono: ").append(singleOrder.getPhone()).append("\n");
-            message.append("Ciudad/Departamento: ").append(singleOrder.getCity()).append("\n"); // Usar el valor actualizado
-            message.append("Dirección exacta: ").append(singleOrder.getAllAddress()).append("\n"); // Usar el valor actualizado
-            message.append("Total de productos: ").append(singleOrder.getTotal()).append("\n"); // Usar el valor actualizado
-            message.append("Fecha de entrega: ").append(singleOrder.getDeliveryDate()).append("\n"); // Usar el valor actualizado
-            message.append("Tipo de orden: ").append(singleOrder.getTypeOrder()).append("\n");
-            message.append("Envío: ").append(singleOrder.getNameDelivery()).append("\n");
-        
-            Map<String, Integer> products = singleOrder.getProducts();
-            for (Map.Entry<String, Integer> entry : products.entrySet()) {
-                message.append("Producto: ").append(entry.getKey()).append(", Cantidad: ").append(entry.getValue()).append("\n");
-            }
-
-
-
-            int option = JOptionPane.showConfirmDialog(editFrame, message.toString(), "Confirmación",
-            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-
-            if (option == JOptionPane.YES_OPTION) {
-                this.updateTextArea();
-                editFrame.dispose();
-                runPanelEditRecursive(currentIndex + 1, totalOrders);
-            }
-
-
+            this.updateTextArea();
+            editFrame.dispose();
             runPanelEditRecursive(currentIndex + 1, totalOrders);
 
         });
@@ -596,5 +570,12 @@ public class decoderOrdersPanel {
         }
 
         return closestShipping;
+    }
+
+    public String getTypeOrderByInputTypeOrder(String inputTypeOrder) {
+        Map<Integer, String> typesOrder = OrderTypeRespository.getTypeOrderMap();
+        List<String> nameListTypeOrders = new ArrayList<>(typesOrder.values());
+        return StringSimilarityFinder.findMostSimilarString(inputTypeOrder,
+                nameListTypeOrders);
     }
 }
