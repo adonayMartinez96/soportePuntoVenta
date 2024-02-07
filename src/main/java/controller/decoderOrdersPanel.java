@@ -144,7 +144,7 @@ public class decoderOrdersPanel {
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
             System.out.println("se preciono el guardado");
-             printDebug();
+            //printDebug();
 
             if (!this.error) {
                 this.save();

@@ -12,18 +12,18 @@ public class DecoderMultipleOrders {
 
     private List<Decoder> orders;
     private String ordersString;
-    private String headerStartOrder;
+    private String headerStartOrder = "Confirmando los datos de su pedido";
     private List<String> requiredKeys;
 
     private List<String> errors;
 
     public DecoderMultipleOrders(String orders) {
-        this.headerStartOrder = "Confirmando los datos de su pedido";
-        this.ordersString = orders;
+        PromptProcessorGpt promptProcessorGpt = new PromptProcessorGpt(orders, "all", this.headerStartOrder);
+        this.ordersString = promptProcessorGpt.getResponseTxt();
+        System.out.println(this.ordersString);
         this.orders = new ArrayList<>();
         this.errors = new ArrayList<>();
         this.requiredKeys = new ArrayList<>();
-       // this.decodeOrders();
     }
 
     public String getHeaderStartOrder() {
@@ -55,7 +55,7 @@ public class DecoderMultipleOrders {
     }
 
     public void decode() {
-        String[] orderBlocks = ordersString.split(headerStartOrder);
+        String[] orderBlocks = ordersString.split(headerStartOrder.toLowerCase());
         if (orderBlocks.length <= 1) {
             this.errors.add("No se encontró el delimitador '" + headerStartOrder + "'");
             return;
@@ -63,23 +63,23 @@ public class DecoderMultipleOrders {
     
         for (String block : orderBlocks) {
             if (!block.trim().isEmpty()) {
-                PromptProcessorGpt promptProcessor = new PromptProcessorGpt(block);
+                PromptProcessorGpt promptProcessor = new PromptProcessorGpt(block, "block");
                 Gson gson = new Gson();
-                String jsonResponse = promptProcessor.getResponse();
+                String jsonResponse = promptProcessor.getResponseJson();
                 String response = "";
                 System.out.println(jsonResponse);
                 if (jsonResponse != null) {
                     OpenAIResponse openAIResponse = gson.fromJson(jsonResponse, OpenAIResponse.class);
                 
                     if (openAIResponse != null && openAIResponse.getChoices() != null && !openAIResponse.getChoices().isEmpty()) {
-                        response = openAIResponse.getChoices().get(0).getText();
+                        response = openAIResponse.getChoices().get(0).getText().replaceAll("[\\[\\]]", "");
                     } else {
                         this.errors.add("La respuesta de gpt viene vacia");
-                        System.out.println(promptProcessor.getResponse()); break;
+                        System.out.println(promptProcessor.getResponseJson()); break;
                     }
                 } else {
                     this.errors.add("La respuesta json de gpt viene vacia");
-                    System.out.println(promptProcessor.getResponse()); break;
+                    System.out.println(promptProcessor.getResponseJson()); break;
                 }
                 Decoder decoder = new Decoder(response);
                 if(decoder.existError()){

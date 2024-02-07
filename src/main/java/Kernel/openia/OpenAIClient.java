@@ -37,36 +37,6 @@ public class OpenAIClient {
         return httpClientManager.sendPostRequest(apiUrl, headers, requestBody);
     }
 
-    public static void main(String[] args) {
-        System.out.println(Config.getApiKeyOpenIA());
-        
-
-             String prompt = "Write a tagline for an ice cream shop.";
-
-
-            PromptProcessorGpt processorGpt = new PromptProcessorGpt(prompt);
-            
-           // System.out.println(processorGpt.getResponse()); 
-
-
-           try {
-            OpenAIClient openAIClient = new OpenAIClient(Config.getApiKeyOpenIA());
-            String model = "gpt-3.5-turbo-instruct";
-            System.out.println(processorGpt.getPromt());
-            String response = openAIClient.createCompletion(model, processorGpt.getPromt());
-            System.out.println(response);
-          } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("error");
-          } 
-            
-
-
-           // System.out.println("repnse: " + openAIResponse.getChoices().get(0).getText());
-   /*       } catch (IOException e) {
-            e.printStackTrace();
-        }   */
-    }
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static String generateRandomString(int length) {
