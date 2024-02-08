@@ -29,9 +29,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.Component;
 
-import decoder.core.DecoderMultipleOrders;
-import decoder.core.EncoderMultipleOrders;
-import decoder.core.Decoder;
+import  Kernel.decoder.DecoderMultipleOrders;
+import  Kernel.decoder.EncoderMultipleOrders;
+import  Kernel.decoder.Decoder;
 
 public class decoderOrdersPanel {
 
@@ -100,7 +100,6 @@ public class decoderOrdersPanel {
         this.frame.setContentPane(this.panel);
 
         this.frame.setVisible(true);
-        System.out.println("Cliqueado");
     }
 
     private void placeComponents(String textArea) {
@@ -125,7 +124,6 @@ public class decoderOrdersPanel {
         scanButton.setBounds(20, textAreaHeight + 20, 80, 25);
         scanButton.setEnabled(enable);
         scanButton.addActionListener(e -> {
-            System.out.println("se preciono el scaneo");
             String text = this.textArea.getText();
             this.scanned = true;
             this.decodeText(text);
@@ -143,7 +141,6 @@ public class decoderOrdersPanel {
         save.setEnabled(enable && this.scanned);
         save.addActionListener(e -> {
             this.decodeText(this.textArea.getText());
-            System.out.println("se preciono el guardado");
             //printDebug();
 
             if (!this.error) {
@@ -500,9 +497,10 @@ public class decoderOrdersPanel {
             singleOrder.setTypeOrder(selectedTypeOrderId, selectedTypeOrderName);
 
 
-            this.updateTextArea();
-            editFrame.dispose();
+          /*   this.updateTextArea(); */
             runPanelEditRecursive(currentIndex + 1);
+            editFrame.dispose();
+           
 
         });
 
