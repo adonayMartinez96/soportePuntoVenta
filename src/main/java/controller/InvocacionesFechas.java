@@ -11,8 +11,6 @@ public class InvocacionesFechas {
     Validaciones validaciones = new Validaciones();
 
     public void fecha(JTextField txtFechaInicio){
-        System.out.println("sou");
-        System.out.println();
         txtFechaInicio.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {

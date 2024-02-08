@@ -180,7 +180,6 @@ public class MainForm extends JFrame {
                 //System.out.println("Holazd");
                 decoderOrdersPanel panel = new decoderOrdersPanel();
                 panel.run();
-                System.out.printf("cliqueado");
             }
         });
     }
