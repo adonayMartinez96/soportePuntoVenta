@@ -30,7 +30,6 @@ public class OpenAIClient {
         requestData.put("temperature", 0);
         Gson gson = new Gson();
         String requestBody = gson.toJson(requestData);
-        System.out.println(requestBody);
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("Authorization", "Bearer " + apiKey);
@@ -42,7 +41,6 @@ public class OpenAIClient {
     public static String generateRandomString(int length) {
         SecureRandom random = new SecureRandom();
         StringBuilder stringBuilder = new StringBuilder(length);
-
         for (int i = 0; i < length; i++) {
             int randomIndex = random.nextInt(CHARACTERS.length());
             char randomChar = CHARACTERS.charAt(randomIndex);

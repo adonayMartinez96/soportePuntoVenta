@@ -9,6 +9,16 @@ public class OpenAIResponse {
     private String model;
     private List<Choice> choices;
     private Usage usage;
+    private String rawJson;
+
+
+    public String getRawJson() {
+        return rawJson;
+    }
+
+    public void setRawJson(String rawJson) {
+        this.rawJson = rawJson;
+    }
 
     public String getId() {
         return id;

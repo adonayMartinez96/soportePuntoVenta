@@ -1,6 +1,9 @@
 package Kernel.openia;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.Gson;
 import Kernel.config.Config;
 
@@ -10,9 +13,14 @@ public class PromptProcessorGpt {
     private String prompt;
     private String model = "gpt-3.5-turbo-instruct";
     private String headerOrderBlock;
+    private List<String> error;
+
+
+    private OpenAIResponse res;
 
     public PromptProcessorGpt(String input, String type) {
         this.input = input;
+        this.error = new ArrayList<>();
         this.prompt = buildPrompt(type);
     }
 
@@ -27,6 +35,8 @@ public class PromptProcessorGpt {
             return this.getPromtBlock();
         } else if (type.equals("all")) {
             return this.getPromptAllBlocks();
+        } else if (type.equals("time")) {
+            return this.getPromptDeleteFormatTimeBlocks();
         }
         return "";
     }
@@ -74,6 +84,17 @@ public class PromptProcessorGpt {
                 .append("\n" + this.input).toString());
     }
 
+    public String getPromptDeleteFormatTimeBlocks() {
+        return normalizeString(new StringBuilder(
+                "Dado un texto copiado de WhatsApp que podría contener la hora, por favor, realiza las siguientes tareas:")
+                .append("\\n 1. Remueve cualquier hora presente en el texto. Si no hay hora, déjalo sin cambios.")
+                .append("\n 2. Si la linea dice 'fecha de entrega' o aperecido, esta fecha no se la quites")
+                .append("\n 3. El pedazo de texto (formato de fecha) tendra el siguiente formato: [hour:minuts time., d/m/Y] username")
+                .append("donde 'username' es el usuario de WhatsApp donde se copio el texto, elimina toda esta linea")
+                .append("Este es el texto: \n")
+                .append(this.input).toString());
+    }
+
     public String getResponseJson() {
         try {
             OpenAIClient openAIClient = new OpenAIClient(Config.getApiKeyOpenIA());
@@ -95,15 +116,32 @@ public class PromptProcessorGpt {
     public OpenAIResponse getResponse() {
         try {
             Gson gson = new Gson();
-            return gson.fromJson(this.getResponseJson(), OpenAIResponse.class);
+            String json = this.getResponseJson();
+            OpenAIResponse response = gson.fromJson(json, OpenAIResponse.class);
+            response.setRawJson(json);  
+            return response;
         } catch (Exception e) {
             System.out.println("Error");
             return null;
         }
     }
+    
 
     public String getResponseTxt() {
-        return this.getResponse().getChoices().get(0).getText();
+
+        try {
+            this.res = this.getResponse();
+            return this.res.getChoices().get(0).getText();
+        } catch (Exception e) {
+            System.out.println("Respuesta nulla de gpt: ");
+            System.out.println(this.res.getRawJson());
+            this.error.add("La respuesta vino vacia y no se por que xd");
+        }
+        return "";
     }
 
+
+    public List<String> getErrors(){
+        return this.error;
+    }
 }
