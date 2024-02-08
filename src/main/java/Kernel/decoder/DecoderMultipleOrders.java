@@ -1,29 +1,33 @@
 package Kernel.decoder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.google.gson.Gson;
 
 import Kernel.openia.OpenAIResponse;
 import Kernel.openia.PromptProcessorGpt;
+import Kernel.whatsapp.TextWhatsAppProcessorGpt;
 
 public class DecoderMultipleOrders {
 
     private List<Decoder> orders;
-    private String ordersString;
     private String headerStartOrder = "Confirmando los datos de su pedido";
     private List<String> requiredKeys;
 
     private List<String> errors;
 
+
+    private List<String> processedBlocks;
     public DecoderMultipleOrders(String orders) {
-        PromptProcessorGpt promptProcessorGpt = new PromptProcessorGpt(orders, "all", this.headerStartOrder);
-        this.ordersString = promptProcessorGpt.getResponseTxt();
-        System.out.println(this.ordersString);
+        TextWhatsAppProcessorGpt textWhatsAppProcessorGpt = new TextWhatsAppProcessorGpt(orders, this.headerStartOrder);
+        this.processedBlocks = textWhatsAppProcessorGpt.getBuilderProcessedBlocks();
         this.orders = new ArrayList<>();
         this.errors = new ArrayList<>();
         this.requiredKeys = new ArrayList<>();
+        this.errors.addAll(textWhatsAppProcessorGpt.getErrors());
     }
 
     public String getHeaderStartOrder() {
@@ -50,68 +54,41 @@ public class DecoderMultipleOrders {
         return this.errors;
     }
 
-    public boolean existError(){
+    public boolean existError() {
         return this.errors.size() != 0;
     }
 
     public void decode() {
-        String[] orderBlocks = ordersString.split(headerStartOrder.toLowerCase());
-        if (orderBlocks.length <= 1) {
-            this.errors.add("No se encontró el delimitador '" + headerStartOrder + "'");
-            return;
-        }
-    
-        for (String block : orderBlocks) {
-            if (!block.trim().isEmpty()) {
-                PromptProcessorGpt promptProcessor = new PromptProcessorGpt(block, "block");
-                Gson gson = new Gson();
-                String jsonResponse = promptProcessor.getResponseJson();
-                String response = "";
-                System.out.println(jsonResponse);
-                if (jsonResponse != null) {
-                    OpenAIResponse openAIResponse = gson.fromJson(jsonResponse, OpenAIResponse.class);
-                
-                    if (openAIResponse != null && openAIResponse.getChoices() != null && !openAIResponse.getChoices().isEmpty()) {
-                        response = openAIResponse.getChoices().get(0).getText().replaceAll("[\\[\\]]", "");
-                    } else {
-                        this.errors.add("La respuesta de gpt viene vacia");
-                        System.out.println(promptProcessor.getResponseJson()); break;
-                    }
-                } else {
-                    this.errors.add("La respuesta json de gpt viene vacia");
-                    System.out.println(promptProcessor.getResponseJson()); break;
-                }
-                Decoder decoder = new Decoder(response);
-                if(decoder.existError()){
-                    this.errors.addAll(decoder.getErrors());
-                    return;
-                }
-                this.checkRequiredKeys(decoder, requiredKeys);
-                orders.add(decoder);
+        for(String block : this.processedBlocks){
+            Decoder decoder = new Decoder(block, this.headerStartOrder);
+            if (decoder.existError()) {
+                this.errors.addAll(decoder.getErrors());
+                return;
             }
-        }
+            this.checkRequiredKeys(decoder, requiredKeys);
+            orders.add(decoder);
+        } 
     }
-    
 
     private void checkRequiredKeys(Decoder decoder, List<String> requiredKeys) {
         List<String> notFoundKeys = new ArrayList<>();
-    
+
         for (String requiredKey : requiredKeys) {
             String[] keyParts = requiredKey.split("\\|");
             boolean found = false;
-    
+
             for (String part : keyParts) {
                 if (!decoder.getValue(decoder.normalizeString(part)).isEmpty()) {
                     found = true;
                     break;
                 }
             }
-    
+
             if (!found) {
                 notFoundKeys.add(requiredKey);
             }
         }
-    
+
         if (!notFoundKeys.isEmpty()) {
             String errorMessage = "No se encontraron las siguientes claves requeridas: " +
                     String.join(", ", notFoundKeys) +

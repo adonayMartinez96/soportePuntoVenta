@@ -3,6 +3,8 @@ package  Kernel.decoder;
 import java.text.Normalizer;
 import java.util.*;
 
+import javax.sound.midi.SysexMessage;
+
 public class Decoder {
 
     private final Map<String, String> data;
@@ -18,9 +20,12 @@ public class Decoder {
     private Map<Integer, String> delivery;
     private Map<Integer, String> typeOrder;
 
+    private String headerStartOrder;
+
     private List<String> errors;
 
-    public Decoder(String input) {
+    public Decoder(String input, String header) {
+        this.headerStartOrder = header;
         this.errors = new ArrayList<>();
         this.delivery = new LinkedHashMap<>();
         this.inputString = input;
@@ -52,6 +57,11 @@ public class Decoder {
     
         for (int count = 0; count < lines.length; count++) {
             String line = lines[count];
+
+            /* Esto solooo por si al caso, aunque ahora ya no creo que sea necesario */
+            if(line.equals(this.headerStartOrder.toLowerCase())){
+                continue;
+            }
     
             String[] parts = line.split(":", 2);
     
