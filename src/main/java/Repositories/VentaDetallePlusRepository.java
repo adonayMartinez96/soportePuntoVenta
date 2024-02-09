@@ -66,7 +66,7 @@ public class VentaDetallePlusRepository {
             insert.setColumn("idh", 0);
             insert.setColumn("id_plu", idProduct, true);
             insert.setColumn("cantidad", 1.0); // esto creo que tambien hay que modificarlo x
-            insert.setColumn("precio", unitPrice - Double.parseDouble(VentaDetallePlusRepository.decoder.getShipping()), true);
+            insert.setColumn("precio", unitPrice - Double.parseDouble(VentaDetallePlusRepository.decoder.getShipping()) / VentaDetallePlusRepository.decoder.getAmountProducts(), true);
             insert.setColumn("descuento", 0.0000);
             insert.setColumn("id_umedida", "1");
             insert.setColumn("horatransaccion", dateOrderInsert, true);
@@ -102,7 +102,7 @@ public class VentaDetallePlusRepository {
             insert.setColumn("untaxable", 0);
             insert.setColumn("descripcion2", "");
             insert.setColumn("identificador", "G");
-            insert.setColumn("precioinicial", unitPrice - Double.parseDouble(VentaDetallePlusRepository.decoder.getShipping()), true);
+            insert.setColumn("precioinicial", unitPrice - Double.parseDouble(VentaDetallePlusRepository.decoder.getShipping()) / VentaDetallePlusRepository.decoder.getAmountProducts(), true);
             insert.setColumn("erp", 0);
             insert.setColumn("monitor", 0.0);
             insert.setColumn("comision", 0);
