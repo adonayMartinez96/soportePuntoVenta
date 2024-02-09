@@ -11,6 +11,7 @@ import java.util.Map;
 
 import Kernel.Respository.CustomPreparedStatement;
 import Kernel.Respository.Insert;
+import Kernel.Respository.Select;
 
 public class OrdersRepository {
 
@@ -60,7 +61,7 @@ public class OrdersRepository {
             insert.setColumn("num_fac_electronica", "");
             insert.setColumn("firma64", "");
             insert.setColumn("idmotorista", 0);
-            insert.setColumn("direccion_domicilio", address, true);
+            insert.setColumn("direccion_domicilio", verifysMaxLen(address, "direccion_domicilio"), true);
             insert.setColumn("referencia_domicilio", reference, true);
             insert.setColumn("cliente_domicilio", nameClient, true);
             insert.setColumn("liquidada_motorista", 0);
@@ -150,6 +151,12 @@ public class OrdersRepository {
     }
 
 
+    public static String verifysMaxLen(String input, String column) {
+        int maxColumnLength = Select.selectMaxColumnLength("ventasdiarias", "venta_encabezado", column);
+        return (maxColumnLength > 0 && input.length() > maxColumnLength) 
+            ? input.substring(0, maxColumnLength) 
+            : input;
+    }
     
 
 }
