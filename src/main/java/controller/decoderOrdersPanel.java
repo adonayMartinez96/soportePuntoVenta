@@ -31,6 +31,7 @@ import java.awt.Component;
 
 import  Kernel.decoder.DecoderMultipleOrders;
 import  Kernel.decoder.EncoderMultipleOrders;
+import  Kernel.errors.Errors;
 import  Kernel.decoder.Decoder;
 
 public class decoderOrdersPanel {
@@ -91,15 +92,20 @@ public class decoderOrdersPanel {
     }
 
     public void run() {
-        this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        /* frame.setSize(300, 200); */
-        this.frame.setSize(this.screenWidth - 40, this.screenHeight - 100);
-
-        this.frame.add(this.panel);
-        this.placeComponents(""); // vacio por defecto
-        this.frame.setContentPane(this.panel);
-
-        this.frame.setVisible(true);
+        try {
+            this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            this.frame.setSize(this.screenWidth - 40, this.screenHeight - 100);
+            this.frame.add(this.panel);
+            this.placeComponents(""); // vacío por defecto
+            this.frame.setContentPane(this.panel);
+            this.frame.setVisible(true);
+        } catch (Exception e) {
+            if (Errors.get().size() > 0) {
+                String errorMessage = String.join("\n", Errors.get());
+                JOptionPane.showMessageDialog(this.frame, errorMessage, "Errores", JOptionPane.ERROR_MESSAGE);
+                this.frame.dispose();
+            }
+        }
     }
 
     private void placeComponents(String textArea) {
@@ -234,6 +240,7 @@ public class decoderOrdersPanel {
     }
 
     public void save() {
+        List<String> info = new ArrayList<>();
         for (Decoder singleOrder : this.orders) {
             System.out.println("Nombre: " + singleOrder.getName());
 
@@ -289,13 +296,8 @@ public class decoderOrdersPanel {
                 idCliente = firstClient.getId();
                 isNew = true;
             } else {
-                System.out.println("\n listo para insertar\n");
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Se registrará al cliente " + singleOrder.getName()
-                                + " como un nuevo cliente. Número de teléfono: " + singleOrder.getPhone(),
-                        "Registro de Cliente Nuevo",
-                        JOptionPane.INFORMATION_MESSAGE);
+                info.add("Se registrará al cliente " + singleOrder.getName()
+                + " como un nuevo cliente. Número de teléfono: " + singleOrder.getPhone());
                 idCliente = insert.insertCustomer(singleOrder.getName(), singleOrder.getPhone());
                 idInsertIfClientNotExists = insertAddress.insertAddressClient(
                         idCliente,
@@ -311,6 +313,21 @@ public class decoderOrdersPanel {
             }
 
         }
+
+        this.showMessageDialog(info);
+    }
+
+    public void showMessageDialog(List<String> info) {
+        if(info.size() == 0){
+            return;
+        }
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("Información:\n");
+        for (String item : info) {
+            messageBuilder.append("• ").append(item).append("\n");
+        }
+        String message = messageBuilder.toString().trim();
+        JOptionPane.showMessageDialog(null, message, "Información", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void runPanelEdit() {
@@ -332,46 +349,46 @@ public class decoderOrdersPanel {
         editFrame.setSize(this.screenWidth - 200, this.screenHeight - 300);
         editFrame.setLocationRelativeTo(null);
 
-        JPanel editPanel = new JPanel();
-        editFrame.add(editPanel);
-        editPanel.setLayout(new GridLayout(0, 2));
+        JPanel editPanel = new JPanel(new GridLayout(2, 1));
+       
+       /*  editPanel.setLayout(new GridLayout(0, 2)); */
+
+
+        JPanel infoPanel = new JPanel(new GridLayout(0, 2));
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 3));
+        buttonPanel.setPreferredSize(new Dimension(this.screenWidth, this.calculatePixels(20, this.screenHeight)));
+        
+
+
 
         JTextField nameField = new JTextField(singleOrder.getName());
-        editPanel.add(new JLabel("Nombre:"));
-        editPanel.add(nameField);
+        infoPanel.add(new JLabel("Nombre:"));
+        infoPanel.add(nameField);
 
         JTextField phoneField = new JTextField(singleOrder.getPhone());
-        editPanel.add(new JLabel("Teléfono:"));
-        editPanel.add(phoneField);
+        infoPanel.add(new JLabel("Teléfono:"));
+        infoPanel.add(phoneField);
 
         JTextField cityField = new JTextField(singleOrder.getCity());
-        editPanel.add(new JLabel("Ciudad:"));
-        editPanel.add(cityField);
+        infoPanel.add(new JLabel("Ciudad:"));
+        infoPanel.add(cityField);
 
         String deparmentValue = singleOrder.getValue("Departamento");
         JTextField departmentField = new JTextField(deparmentValue);
-        editPanel.add(new JLabel("Departamento:"));
-        editPanel.add(departmentField);
+        infoPanel.add(new JLabel("Departamento:"));
+        infoPanel.add(departmentField);
 
         JTextField exactAddressField = new JTextField(singleOrder.getAllAddress());
-        editPanel.add(new JLabel("Direccion exacta:"));
-        editPanel.add(exactAddressField);
+        infoPanel.add(new JLabel("Direccion exacta:"));
+        infoPanel.add(exactAddressField);
 
         JTextField totalAmountField = new JTextField(singleOrder.getTotal());
-        editPanel.add(new JLabel("Total producto:"));
-        editPanel.add(totalAmountField);
-
-        /*
-         * Esto lo comente por que ahora los envios no vienen del texto, vienen del
-         * combobox xd
-         * JTextField shippingField = new JTextField(singleOrder.getShipping());
-         * editPanel.add(new JLabel("Envio:"));
-         * editPanel.add(shippingField);
-         */
+        infoPanel.add(new JLabel("Total producto:"));
+        infoPanel.add(totalAmountField);
 
         JTextField deliveryDateField = new JTextField(singleOrder.getDeliveryDate());
-        editPanel.add(new JLabel("Fecha entrega:"));
-        editPanel.add(deliveryDateField);
+        infoPanel.add(new JLabel("Fecha entrega:"));
+        infoPanel.add(deliveryDateField);
 
         Map<JComboBox<String>, JTextField> productFields = new LinkedHashMap<>();
 
@@ -381,29 +398,29 @@ public class decoderOrdersPanel {
 
             JComboBox<String> productComboBox = this.createProductComboBox(productNameInput);
             JTextField productFieldCantidad = new JTextField(Integer.toString(productQuantityInput));
-            editPanel.add(new JLabel("Producto:"));
-            editPanel.add(productComboBox);
-            editPanel.add(new JLabel("Cantidad:"));
-            editPanel.add(productFieldCantidad);
+            infoPanel.add(new JLabel("Producto:"));
+            infoPanel.add(productComboBox);
+            infoPanel.add(new JLabel("Cantidad:"));
+            infoPanel.add(productFieldCantidad);
             productFields.put(productComboBox, productFieldCantidad);
         }
 
         Map<Integer, String> deliveryMap = ProductsRepository.getDeliveryMap();
         List<Integer> idList = new ArrayList<>(deliveryMap.keySet());
         List<String> nameList = new ArrayList<>(deliveryMap.values());
-        editPanel.add(new JLabel("Envios:"));
+        infoPanel.add(new JLabel("Envios:"));
         JComboBox<String> deliveryComboBox = new JComboBox<>(nameList.toArray(new String[0]));
         String selectedShipping = this.findClosestShipping(Extractor.getValues(deliveryMap), singleOrder.getShipping());
         int selectedIndex = nameList.indexOf(selectedShipping);
         if (selectedIndex != -1) {
             deliveryComboBox.setSelectedIndex(selectedIndex);
         }
-        editPanel.add(deliveryComboBox);
+        infoPanel.add(deliveryComboBox);
 
         Map<Integer, String> typesOrder = OrderTypeRespository.getTypeOrderMap();
         List<Integer> idListTypeOrders = new ArrayList<>(typesOrder.keySet());
         List<String> nameListTypeOrders = new ArrayList<>(typesOrder.values());
-        editPanel.add(new JLabel("Tipo de orden:"));
+        infoPanel.add(new JLabel("Tipo de orden:"));
         JComboBox<String> typeOrdersComboBox = new JComboBox<>(nameListTypeOrders.toArray(new String[0]));
         String selectTypeOrder = StringSimilarityFinder.findMostSimilarString(singleOrder.getTypeOrder(),
                 nameListTypeOrders);
@@ -411,7 +428,7 @@ public class decoderOrdersPanel {
         if (selectedTypeOrderIndex != -1) {
             typeOrdersComboBox.setSelectedIndex(selectedTypeOrderIndex);
         }
-        editPanel.add(typeOrdersComboBox);
+        infoPanel.add(typeOrdersComboBox);
 
         final String[] selectedDeliveryNameChange = { (String) deliveryComboBox.getSelectedItem() };
         final Integer[] selectedDeliveryIdChange = { idList.get(nameList.indexOf(selectedDeliveryNameChange[0])) };
@@ -426,8 +443,8 @@ public class decoderOrdersPanel {
         double initialTotal = Double.parseDouble(singleOrder.getTotal());
         singleOrder.setTotalToPay(roundToTwoDecimals(initialTotal + deliveryPrice[0]));
         JTextField total = new JTextField(String.valueOf(roundToTwoDecimals(initialTotal + deliveryPrice[0])));
-        editPanel.add(new JLabel("Total a pagar:"));
-        editPanel.add(total);
+        infoPanel.add(new JLabel("Total a pagar:"));
+        infoPanel.add(total);
 
         deliveryComboBox.addActionListener(e -> {
             // Utilizar la variable final
@@ -442,6 +459,7 @@ public class decoderOrdersPanel {
             total.setText(String.valueOf(newTotal));
         });
 
+        
         JButton nextButton = new JButton("Siguiente");
         nextButton.addActionListener(e -> {
             /*
@@ -504,7 +522,72 @@ public class decoderOrdersPanel {
 
         });
 
-        editPanel.add(nextButton);
+        buttonPanel.add(nextButton);
+
+
+        JButton prevButton  = new JButton("Atras");
+        prevButton.addActionListener(e -> {
+            /*
+             * Aca editar cada una de las cosas, por el momento solamente se pueden editar
+             * esos
+             * tres campos (son los que se van a cambiar con el la lista de decoders que
+             * estas
+             * cargada en ram en ese momento)
+             * 
+             * arriba se tendra que poner todos los fields para que se puedan editar, en
+             * este momento
+             * tambien solamente estan Nombre, Telefono, Ciudad
+             */
+            singleOrder.setData("name", nameField.getText());
+            singleOrder.setData("phone", phoneField.getText());
+            singleOrder.setData("city", departmentField.getText() + " - " + cityField.getText());
+            singleOrder.setData("address", exactAddressField.getText());
+            singleOrder.setData("price", totalAmountField.getText());
+            /* singleOrder.setData("shipping", shippingField.getText()); */
+            singleOrder.setData("total", totalAmountField.getText());
+            singleOrder.setData("delivery date", deliveryDateField.getText());
+
+            /*
+             * Este codigo que esta aca sirve para detectar mutabilidad en los datos del
+             * formulario
+             * en la parte de productos, el map esta de esta manera:
+             * nameProduct -> quantity
+             */
+            Map<String, Integer> updatedProducts = new LinkedHashMap<>();
+            for (Map.Entry<JComboBox<String>, JTextField> entry : productFields.entrySet()) {
+                String productName = (String) entry.getKey().getSelectedItem();
+                int productQuantity = Integer.parseInt(entry.getValue().getText());
+                updatedProducts.put(productName, productQuantity);
+            }
+
+            Map<String, Integer> mainMapProducts = singleOrder.getProducts();
+            Map<String, Integer> finalProducts = new LinkedHashMap<>(mainMapProducts);
+            finalProducts.keySet().retainAll(updatedProducts.keySet());
+            for (Map.Entry<String, Integer> entry : updatedProducts.entrySet()) {
+                String productName = entry.getKey();
+                Integer updatedQuantity = entry.getValue();
+                finalProducts.put(productName, updatedQuantity);
+            }
+
+            singleOrder.editData(finalProducts);
+
+            String selectedDeliveryName = (String) deliveryComboBox.getSelectedItem();
+            Integer selectedDeliveryId = idList.get(nameList.indexOf(selectedDeliveryName));
+            singleOrder.setDelivery(selectedDeliveryId, selectedDeliveryName);
+
+            String selectedTypeOrderName = (String) typeOrdersComboBox.getSelectedItem();
+            Integer selectedTypeOrderId = idListTypeOrders.get(nameListTypeOrders.indexOf(selectedTypeOrderName));
+            singleOrder.setTypeOrder(selectedTypeOrderId, selectedTypeOrderName);
+
+
+          /*   this.updateTextArea(); */
+            runPanelEditRecursive(currentIndex - 1);
+            editFrame.dispose();
+           
+
+        });
+
+        buttonPanel.add(prevButton);
 
 
         JButton cancelButton = new JButton("Cancelar orden");
@@ -529,13 +612,32 @@ public class decoderOrdersPanel {
                     JOptionPane.INFORMATION_MESSAGE
                 );
             }
-            runPanelEditRecursive(currentIndex + 1);
+            runPanelEditRecursive(currentIndex);
             editFrame.dispose();
         });
-        
-        editPanel.add(cancelButton);
 
+        buttonPanel.add(cancelButton);
+
+
+        Dimension infoPanelSize = new Dimension(screenWidth, calculatePixels(50, screenHeight));
+        infoPanel.setPreferredSize(infoPanelSize);
+        infoPanel.setMinimumSize(infoPanelSize);
+        infoPanel.setMaximumSize(infoPanelSize);
+        
+        Dimension buttonPanelSize = new Dimension(screenWidth, calculatePixels(30, screenHeight));
+        buttonPanel.setPreferredSize(buttonPanelSize);
+        buttonPanel.setMinimumSize(buttonPanelSize);
+        buttonPanel.setMaximumSize(buttonPanelSize);
+        
+
+        
+        editPanel.add(infoPanel);
+        editPanel.add(buttonPanel);
         editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        editFrame.add(editPanel);
+
+
+        
         editFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -605,5 +707,13 @@ public class decoderOrdersPanel {
         List<String> nameListTypeOrders = new ArrayList<>(typesOrder.values());
         return StringSimilarityFinder.findMostSimilarString(inputTypeOrder,
                 nameListTypeOrders);
+    }
+
+    public  int calculatePixels(double percentage, int totalHeight) {
+        if (percentage < 0 || percentage > 100) {
+            throw new IllegalArgumentException("El porcentaje debe estar entre 0 y 100.");
+        }
+
+        return (int) Math.round((percentage / 100) * totalHeight);
     }
 }
