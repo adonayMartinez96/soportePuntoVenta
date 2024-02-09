@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import Kernel.config.Config;
+import Kernel.errors.Errors;
 
 public class PromptProcessorGpt {
 
@@ -62,7 +63,7 @@ public class PromptProcessorGpt {
                 .append("Departamento: [Departamento]")
                 .append("Referencia: [Referencia]")
                 .append("Productos: [Productos]")
-                .append("Total producto: [Total producto]")
+                .append("Total productos: [Total producto]")
                 .append("Envío: [Envío]")
                 .append("Fecha de entrega: [Fecha de entrega]")
                 .append("Comentario: [Comentario]")
@@ -133,9 +134,7 @@ public class PromptProcessorGpt {
             this.res = this.getResponse();
             return this.res.getChoices().get(0).getText();
         } catch (Exception e) {
-            System.out.println("Respuesta nulla de gpt: ");
-            System.out.println(this.res.getRawJson());
-            this.error.add("La respuesta vino vacia y no se por que xd");
+           Errors.add("Respuesta nulla de gpt, intentelo mas tarde o trate de agregar menos ordenes.");
         }
         return "";
     }
