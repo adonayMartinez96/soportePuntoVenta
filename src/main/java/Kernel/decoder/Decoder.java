@@ -5,6 +5,8 @@ import java.util.*;
 
 import javax.sound.midi.SysexMessage;
 
+import Kernel.utils.Numbers;
+
 public class Decoder {
 
     private final Map<String, String> data;
@@ -33,13 +35,17 @@ public class Decoder {
         this.products = new LinkedHashMap<>();
         this.decodeData(input);
         this.shipmentCost = Double.parseDouble(this.getShipping());
-        this.totalToPay = Double.parseDouble(this.getTotal()) + this.shipmentCost;
         this.totalAmountProducts = Double.parseDouble(this.getTotal()); //esto es el total del productos
+        this.totalToPay = this.totalAmountProducts + this.shipmentCost;
         this.typeOrder = new LinkedHashMap<>();
     }
 
     public String getStringData(){
         return this.inputString;
+    }
+
+    public Double getTotalToPay(){
+        return this.totalToPay;
     }
 
     public String normalizeString(String key) {
@@ -54,6 +60,7 @@ public class Decoder {
     private void decodeData(String input) {
         String[] lines = this.sanitize(input).split("\\n");
         boolean productosKeyFound = false;
+        boolean shipmentCostKeyFound = false;
     
         for (int count = 0; count < lines.length; count++) {
             String line = lines[count];
@@ -66,6 +73,7 @@ public class Decoder {
             String[] parts = line.split(":", 2);
     
             if (parts.length != 2) {
+                System.out.println(input);
                 this.errors.add("Error en línea " + count + ": '" + line + "'. No se encontró ':' o el formato es incorrecto.");
                 continue;
             }
@@ -74,19 +82,24 @@ public class Decoder {
             String value = parts[1].trim();
 
             if(key.equals("comentario")){
-                value = "-";
+                if(value.isEmpty()){
+                    value = "-";
+                }
+            }
+
+            if(key.equals("envio")){
+                shipmentCostKeyFound = true;
+                if(value.isEmpty() || !Numbers.isNumber(value)){
+                    value = "0";
+                }
             }
 
     
-            if (key.isEmpty() || value.isEmpty()) {
+             if (key.isEmpty() || value.isEmpty()) {
+                this.errors.add("Error en línea " + count + ": '" + line + "'. La clave o el valor están vacíos.");
+                continue;
 
-
-                if(!key.equals("envio")){ //esto sifnigica que chat gpt puso el envio pero nulo por que en el input no pusieron envio
-                    this.errors.add("Error en línea " + count + ": '" + line + "'. La clave o el valor están vacíos.");
-                    continue;
-                }
-
-            }
+            } 
     
             if (key.startsWith("productos")) {
                 if (productosKeyFound) {
@@ -102,6 +115,10 @@ public class Decoder {
     
         if (!productosKeyFound) {
             this.errors.add("No se encontró la clave 'productos'. Corrija y vuelva a intentarlo.");
+        }
+
+        if(!shipmentCostKeyFound){
+            this.data.put("envio", "0");
         }
 
         System.out.println(this.data);
@@ -344,7 +361,7 @@ public class Decoder {
             case "shipping":
                 return "envio";
             case "total":
-                return "total producto";
+                return "total productos";
             case "delivery date":
                 return "fecha de entrega";
             case "salesperson":
