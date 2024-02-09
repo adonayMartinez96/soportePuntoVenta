@@ -2,10 +2,13 @@ package Kernel.whatsapp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import Kernel.components.Components;
 import Kernel.openia.PromptProcessorGpt;
 import Kernel.utils.Numbers;
 import Kernel.utils.Print;
@@ -30,13 +33,46 @@ public class TextWhatsAppProcessorGpt {
 
     public List<String> errors;
 
+    //Esto por que o si no se tienen muchas connectiones a la base y esta falla xd
+    public final int MAX_ORDERS_ORDERS = 50; 
+
     public TextWhatsAppProcessorGpt(String inputText, String headerOrderBlock) {
         this.errors = new ArrayList<>();
         this.allresponseChatGpt = new ArrayList<>();
         this.info = new ArrayList<>();
-        this.inputText = (inputText.toLowerCase());
+        this.inputText = this.sanitizeString(inputText, this.rules());
         this.headerOrderBlock = headerOrderBlock.toLowerCase();
+        this.verifyMaxOrders();
         this.builderTextResponseProcessGtp();
+    }
+
+
+    public void verifyMaxOrders() {
+        int orderCount = countOccurrences(inputText, headerOrderBlock);
+        if (orderCount > MAX_ORDERS_ORDERS) {
+            String message = String.format("Has intentado insertar %d órdenes. " + 
+            " Por favor, intenta insertar un máximo de %d órdenes. ¡El programa se cerrará!",
+                                           orderCount, MAX_ORDERS_ORDERS);
+            Components.showDialog(message);
+            System.exit(0);
+        }
+    }
+    
+
+    /*
+     * Esta es una funcion de reglas, si encuentra una key, la va a reemplazar
+     * por el value
+     */
+    public Map<String, String> rules() {
+        Map<String, String> rules = new HashMap<>();
+        rules.put("producto", "productos");
+        /* Con este tipo de caracteres hay que tener cuidado
+         * por que no basta con solamente hacer que la request
+         * acepte todos los UTF_8, a veces parece ser gtp trabandose
+         * o algo asi
+         */
+        rules.put("ç", "");
+        return rules;
     }
 
     /*
@@ -54,6 +90,17 @@ public class TextWhatsAppProcessorGpt {
     public boolean isDirty(String text) {
         return this.comprobateFormatTextTimeWhatsAppOfList(
                 this.extractTextsBetweenBrackets(text));
+    }
+
+    public int countOccurrences(String block, String substring) {
+        int counter = 0;
+        int index = block.indexOf(substring);
+
+        while (index != -1) {
+            counter++;
+            index = block.indexOf(substring, index + 1);
+        }
+        return counter;
     }
 
     public List<String> extractTextsBetweenBrackets(String input) {
@@ -84,17 +131,17 @@ public class TextWhatsAppProcessorGpt {
 
     public boolean comprobateFormatTextTimeWhatsAppOfList(List<String> list) {
         for (String text : list) {
-            // Eliminar corchetes
             text = text.replace("[", "").replace("]", "");
-
             String[] data = text.split(",");
             if (data.length == 2) {
-                // Verificar formato de hora
+                /* 
+                 * Aca no estoy seguro si se valida el pm y el am, pero por el momento no da error jaja
+                 */
                 String[] hourData = data[0].split(":");
                 if (hourData.length != 2 || !Numbers.isNumber(hourData[0]) || !Numbers.isNumber(hourData[1])) {
                     return true;
                 }
-                // Verificar formato de fecha
+                /* Se verifica el formato de fecha */
                 String[] dateSplit = data[1].split("/");
                 if (dateSplit.length != 3 || !Numbers.isNumber(dateSplit[0]) || !Numbers.isNumber(dateSplit[1])
                         || !Numbers.isNumber(dateSplit[2])) {
@@ -125,19 +172,19 @@ public class TextWhatsAppProcessorGpt {
                     if (!block.trim().isEmpty()) {
                         if (this.isDirty(block)) {
 
-                      /*       System.out.println("Este es el bloque sucicio que entra: ");
-                            System.out.println(block); */
+                            /*
+                             * System.out.println("Este es el bloque sucicio que entra: ");
+                             * System.out.println(block);
+                             */
 
                             PromptProcessorGpt promptProcessorGpt1 = new PromptProcessorGpt(block, "time");
                             this.errors.addAll(promptProcessorGpt1.getErrors());
                             String responseWithOutTime = promptProcessorGpt1.getResponseTxt();
 
-
                             PromptProcessorGpt promptProcessorGpt2 = new PromptProcessorGpt(responseWithOutTime,
                                     "block");
                             this.errors.addAll(promptProcessorGpt2.getErrors());
                             this.allresponseChatGpt.add(promptProcessorGpt2.getResponseTxt());
-
 
                         } else {
                             PromptProcessorGpt promptProcessorGpt3 = new PromptProcessorGpt(block, "block");
@@ -225,6 +272,14 @@ public class TextWhatsAppProcessorGpt {
 
     public List<String> getErrors() {
         return this.errors;
+    }
+
+    public String sanitizeString(String inputText, Map<String, String> rules) {
+        inputText = inputText.toLowerCase();
+        for (Map.Entry<String, String> entry : rules.entrySet()) {
+            inputText = inputText.replaceAll(entry.getKey(), entry.getValue());
+        }
+        return inputText;
     }
 
 }
