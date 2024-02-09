@@ -25,4 +25,9 @@ public class Config {
         return dotenv.get("DB_PORT");
     }
 
+
+    public static String getVersionApp(){
+        return dotenv.get("APP_VERSION");
+    }
+
 }
