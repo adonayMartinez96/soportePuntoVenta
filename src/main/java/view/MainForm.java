@@ -7,6 +7,9 @@ import controller.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import Kernel.config.Config;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
@@ -102,6 +105,7 @@ public class MainForm extends JFrame {
         setSize(anchoPantalla,altoPantalla-50);
         setLocationRelativeTo(null);
         setVisible(true);
+        setTitle("Version: " + Config.getVersionApp());
 
         //establece fecha del sistema a los campos fecha inicial y fecha final por defecto
         cargaPorDefecto.setCamposFehas(txtFechaInicio,txtFechafin);
