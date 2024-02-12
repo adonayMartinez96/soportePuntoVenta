@@ -227,6 +227,7 @@ public class OrderController {
 
     private List<Map<String, Object>> insertSaleDelivery(){
         if (!this.data.existDelivery()) {
+            System.out.println("No hay envio ping");
             return Collections.emptyList();
         }
     

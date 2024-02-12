@@ -405,6 +405,10 @@ public class decoderOrdersPanel {
             productFields.put(productComboBox, productFieldCantidad);
         }
 
+
+
+
+
         Map<Integer, String> deliveryMap = ProductsRepository.getDeliveryMap();
         List<Integer> idList = new ArrayList<>(deliveryMap.keySet());
         List<String> nameList = new ArrayList<>(deliveryMap.values());
@@ -416,6 +420,11 @@ public class decoderOrdersPanel {
             deliveryComboBox.setSelectedIndex(selectedIndex);
         }
         infoPanel.add(deliveryComboBox);
+
+
+
+
+
 
         Map<Integer, String> typesOrder = OrderTypeRespository.getTypeOrderMap();
         List<Integer> idListTypeOrders = new ArrayList<>(typesOrder.keySet());
@@ -429,6 +438,10 @@ public class decoderOrdersPanel {
             typeOrdersComboBox.setSelectedIndex(selectedTypeOrderIndex);
         }
         infoPanel.add(typeOrdersComboBox);
+
+
+
+
 
         final String[] selectedDeliveryNameChange = { (String) deliveryComboBox.getSelectedItem() };
         final Integer[] selectedDeliveryIdChange = { idList.get(nameList.indexOf(selectedDeliveryNameChange[0])) };
@@ -452,6 +465,7 @@ public class decoderOrdersPanel {
             selectedDeliveryIdChange[0] = idList.get(nameList.indexOf(selectedDeliveryNameChange[0]));
             deliveryPrice[0] = Double
                     .parseDouble(VentaDetallePlusRepository.getPriceDeliveryById(selectedDeliveryIdChange[0]));
+
             double currentTotal = Double.parseDouble(singleOrder.getTotal());
             double newTotal = roundToTwoDecimals(currentTotal + deliveryPrice[0]);
             singleOrder.setTotalToPay(newTotal);
@@ -478,7 +492,6 @@ public class decoderOrdersPanel {
             singleOrder.setData("city", departmentField.getText() + " - " + cityField.getText());
             singleOrder.setData("address", exactAddressField.getText());
             singleOrder.setData("price", totalAmountField.getText());
-            /* singleOrder.setData("shipping", shippingField.getText()); */
             singleOrder.setData("total", totalAmountField.getText());
             singleOrder.setData("delivery date", deliveryDateField.getText());
 
@@ -527,17 +540,6 @@ public class decoderOrdersPanel {
 
         JButton prevButton  = new JButton("Atras");
         prevButton.addActionListener(e -> {
-            /*
-             * Aca editar cada una de las cosas, por el momento solamente se pueden editar
-             * esos
-             * tres campos (son los que se van a cambiar con el la lista de decoders que
-             * estas
-             * cargada en ram en ese momento)
-             * 
-             * arriba se tendra que poner todos los fields para que se puedan editar, en
-             * este momento
-             * tambien solamente estan Nombre, Telefono, Ciudad
-             */
             singleOrder.setData("name", nameField.getText());
             singleOrder.setData("phone", phoneField.getText());
             singleOrder.setData("city", departmentField.getText() + " - " + cityField.getText());
