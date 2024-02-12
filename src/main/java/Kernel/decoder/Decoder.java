@@ -89,7 +89,7 @@ public class Decoder {
 
             if(key.equals("envio")){
                 shipmentCostKeyFound = true;
-                if(value.isEmpty() || !Numbers.isNumber(value)){
+                if(value.isEmpty()){
                     value = "0";
                 }
             }
