@@ -30,4 +30,8 @@ public class Config {
         return dotenv.get("APP_VERSION");
     }
 
+    public static String getExcelRute(){
+        return dotenv.get("EXCEL_RUTE");
+    }
+
 }
