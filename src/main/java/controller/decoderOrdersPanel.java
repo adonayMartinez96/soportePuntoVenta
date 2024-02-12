@@ -21,6 +21,7 @@ import Repositories.OrderTypeRespository;
 import Repositories.ProductsRepository;
 import Repositories.VentaDetallePlusRepository;
 
+import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -32,6 +33,7 @@ import java.awt.Component;
 import  Kernel.decoder.DecoderMultipleOrders;
 import  Kernel.decoder.EncoderMultipleOrders;
 import  Kernel.errors.Errors;
+import Kernel.components.CustomComboBoxRenderer;
 import  Kernel.decoder.Decoder;
 
 public class decoderOrdersPanel {
@@ -64,6 +66,9 @@ public class decoderOrdersPanel {
 
 
     boolean wasDeleteOrder = false;
+
+
+    Font font = new Font("Arial", Font.PLAIN, 18);
 
     /*
      * en esta funcion se definen los key que son requeridos, si el decoder
@@ -109,6 +114,7 @@ public class decoderOrdersPanel {
     }
 
     private void placeComponents(String textArea) {
+        this.textArea.setFont(this.font);
         this.panel.setLayout(null);
         this.textArea.setLineWrap(true);
         this.textArea.setWrapStyleWord(true);
@@ -346,7 +352,10 @@ public class decoderOrdersPanel {
         editFrame.setTitle(editFrame.getTitle() + " (" + singleOrder.getName() + ") ");
         editFrame.setTitle(editFrame.getTitle() + this.getTypeOrderByInputTypeOrder(singleOrder.getTypeOrder()));
         editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        editFrame.setSize(this.screenWidth - 200, this.screenHeight - 300);
+
+        final int constante = 150;
+        int width = (int) ((this.screenHeight - constante) * 1.618);
+        editFrame.setSize(width, this.screenHeight - constante);
         editFrame.setLocationRelativeTo(null);
 
         JPanel editPanel = new JPanel(new GridLayout(2, 1));
@@ -360,77 +369,66 @@ public class decoderOrdersPanel {
         
 
 
-
-        JTextField nameField = new JTextField(singleOrder.getName());
-        infoPanel.add(new JLabel("Nombre:"));
-        infoPanel.add(nameField);
-
-        JTextField phoneField = new JTextField(singleOrder.getPhone());
-        infoPanel.add(new JLabel("Teléfono:"));
-        infoPanel.add(phoneField);
-
-        JTextField cityField = new JTextField(singleOrder.getCity());
-        infoPanel.add(new JLabel("Ciudad:"));
-        infoPanel.add(cityField);
-
-        String deparmentValue = singleOrder.getValue("Departamento");
-        JTextField departmentField = new JTextField(deparmentValue);
-        infoPanel.add(new JLabel("Departamento:"));
-        infoPanel.add(departmentField);
-
-        JTextField exactAddressField = new JTextField(singleOrder.getAllAddress());
-        infoPanel.add(new JLabel("Direccion exacta:"));
-        infoPanel.add(exactAddressField);
-
-        JTextField totalAmountField = new JTextField(singleOrder.getTotal());
-        infoPanel.add(new JLabel("Total producto:"));
-        infoPanel.add(totalAmountField);
-
-        JTextField deliveryDateField = new JTextField(singleOrder.getDeliveryDate());
-        infoPanel.add(new JLabel("Fecha entrega:"));
-        infoPanel.add(deliveryDateField);
+        
+        JTextField nameField = setLabelAndInput("Nombre: ", singleOrder.getName(), infoPanel);
+        JTextField phoneField = setLabelAndInput("Teléfono: ", singleOrder.getPhone(), infoPanel);
+        JTextField cityField = setLabelAndInput("Ciudad: ", singleOrder.getCity(), infoPanel);
+        JTextField departmentField = setLabelAndInput("Departamento: ", singleOrder.getValue("Departamento"), infoPanel);
+        JTextField exactAddressField = setLabelAndInput("Direccion exacta: ", singleOrder.getAllAddress(), infoPanel);
+        JTextField totalAmountField = setLabelAndInput("Total producto: ", singleOrder.getTotal(), infoPanel);
+        JTextField deliveryDateField = setLabelAndInput("Fecha entrega: ", singleOrder.getDeliveryDate(), infoPanel);
 
         Map<JComboBox<String>, JTextField> productFields = new LinkedHashMap<>();
 
         for (Map.Entry<String, Integer> entry : singleOrder.getProducts().entrySet()) {
             String productNameInput = entry.getKey();
             int productQuantityInput = entry.getValue();
-
-            JComboBox<String> productComboBox = this.createProductComboBox(productNameInput);
+        
+            JComboBox<String> productComboBox = createProductComboBox(productNameInput);
             JTextField productFieldCantidad = new JTextField(Integer.toString(productQuantityInput));
-            infoPanel.add(new JLabel("Producto:"));
+            JLabel productLabel = new JLabel("Producto:");
+            productLabel.setFont(this.font);
+        
+            JLabel quantityLabel = new JLabel("Cantidad:");
+            quantityLabel.setFont(this.font);
+            productComboBox.setFont(this.font);
+        
+            infoPanel.add(productLabel);
             infoPanel.add(productComboBox);
-            infoPanel.add(new JLabel("Cantidad:"));
+            infoPanel.add(quantityLabel);
             infoPanel.add(productFieldCantidad);
+        
             productFields.put(productComboBox, productFieldCantidad);
         }
-
-
-
-
+        
 
         Map<Integer, String> deliveryMap = ProductsRepository.getDeliveryMap();
         List<Integer> idList = new ArrayList<>(deliveryMap.keySet());
         List<String> nameList = new ArrayList<>(deliveryMap.values());
-        infoPanel.add(new JLabel("Envios:"));
+        JLabel deliveryLabel = new JLabel("Envios:");
+        deliveryLabel.setFont(this.font);
+        infoPanel.add(deliveryLabel);
         JComboBox<String> deliveryComboBox = new JComboBox<>(nameList.toArray(new String[0]));
+        deliveryComboBox.setFont(this.font);
+        
         String selectedShipping = this.findClosestShipping(Extractor.getValues(deliveryMap), singleOrder.getShipping());
         int selectedIndex = nameList.indexOf(selectedShipping);
         if (selectedIndex != -1) {
             deliveryComboBox.setSelectedIndex(selectedIndex);
         }
         infoPanel.add(deliveryComboBox);
-
-
-
-
-
+        
 
         Map<Integer, String> typesOrder = OrderTypeRespository.getTypeOrderMap();
         List<Integer> idListTypeOrders = new ArrayList<>(typesOrder.keySet());
         List<String> nameListTypeOrders = new ArrayList<>(typesOrder.values());
-        infoPanel.add(new JLabel("Tipo de orden:"));
+        JLabel typeOrderLabel = new JLabel("Tipo de orden:");
+        typeOrderLabel.setFont(this.font);
+        infoPanel.add(typeOrderLabel);
         JComboBox<String> typeOrdersComboBox = new JComboBox<>(nameListTypeOrders.toArray(new String[0]));
+        typeOrdersComboBox.setBackground(Color.RED);
+        typeOrdersComboBox.setFont(this.font);
+        
         String selectTypeOrder = StringSimilarityFinder.findMostSimilarString(singleOrder.getTypeOrder(),
                 nameListTypeOrders);
         int selectedTypeOrderIndex = nameListTypeOrders.indexOf(selectTypeOrder);
@@ -438,10 +436,7 @@ public class decoderOrdersPanel {
             typeOrdersComboBox.setSelectedIndex(selectedTypeOrderIndex);
         }
         infoPanel.add(typeOrdersComboBox);
-
-
-
-
+        
 
         final String[] selectedDeliveryNameChange = { (String) deliveryComboBox.getSelectedItem() };
         final Integer[] selectedDeliveryIdChange = { idList.get(nameList.indexOf(selectedDeliveryNameChange[0])) };
@@ -455,9 +450,13 @@ public class decoderOrdersPanel {
         // Inicializar el JTextField con el total inicial
         double initialTotal = Double.parseDouble(singleOrder.getTotal());
         singleOrder.setTotalToPay(roundToTwoDecimals(initialTotal + deliveryPrice[0]));
+        JLabel totalLabel = new JLabel("Total a pagar:");
+        totalLabel.setFont(this.font);
+        infoPanel.add(totalLabel);
         JTextField total = new JTextField(String.valueOf(roundToTwoDecimals(initialTotal + deliveryPrice[0])));
-        infoPanel.add(new JLabel("Total a pagar:"));
+        total.setFont(this.font);
         infoPanel.add(total);
+        
 
         deliveryComboBox.addActionListener(e -> {
             // Utilizar la variable final
@@ -717,5 +716,16 @@ public class decoderOrdersPanel {
         }
 
         return (int) Math.round((percentage / 100) * totalHeight);
+    }
+
+
+    public JTextField setLabelAndInput(String name, String value, JPanel panel){
+        JTextField field = new JTextField(value);
+        JLabel label = new JLabel(name);
+        label.setFont(this.font);
+        field.setFont(this.font);
+        panel.add(label);
+        panel.add(field);
+        return field;
     }
 }
