@@ -13,7 +13,7 @@ public class CargaPorDefecto {
 
     public void loadOrdenes(JTable tblOrdenes, DefaultTableModel model){
         try{
-            String ventasDiarias = "select \n" +
+            /*String ventasDiarias = "select \n" +
                     "\t\tconcat(diaria_encabezado.num_doc,'-', diaria_encabezado.no_orden) as orden,\n" +
                     "\tdiaria_encabezado.hora_cerro AS hora_cerro,\n" +
                     "\t(diaria_encabezado.fechatransaccion) as fecha_ingreso,\n" +
@@ -34,7 +34,30 @@ public class CargaPorDefecto {
                     "SUBSTRING_INDEX(rp.no_orden, '-', 1) = diaria_encabezado.num_doc AND \n" +
                     "SUBSTRING_INDEX(rp.no_orden, '-', -1) = diaria_encabezado.no_orden \n" +
                     "group by diaria_encabezado.id,RP.fecha_registro_pago \n"+
-                    "order by diaria_encabezado.hora_cerro desc \n";
+                    "order by diaria_encabezado.hora_cerro desc \n";*/
+
+            String ventasDiarias = "select \n" +
+                    "                    concat(diaria_encabezado.num_doc,'-', diaria_encabezado.no_orden) as orden,\n" +
+                    "                    diaria_encabezado.hora_cerro AS hora_cerro,\n" +
+                    "                    (diaria_encabezado.fechatransaccion) as fecha_ingreso,\n" +
+                    "                    diaria_encabezado.cliente_domicilio as NOMBRE,\n" +
+                    "                    diaria_encabezado.observacion as TELEFONO,\n" +
+                    "                    SUBSTRING_INDEX(diaria_encabezado.direccion_domicilio, '-', -1) as direccion,\n" +
+                    "                    SUBSTRING_INDEX(diaria_encabezado.direccion_domicilio, '-', 1) as ciudad,\n" +
+                    "                    SUBSTRING_INDEX(SUBSTRING_INDEX(diaria_encabezado.direccion_domicilio, '-', 2),'-',-1) departamento,\n" +
+                    "                    (select m.nombre  from silverpos.motoristas m where diaria_encabezado.idmotorista = m.id) as motorista,\n" +
+                    "                    SUM(vdp.precioinicial * vdp.cantidad - vdp.descuento) AS valor_declarado,\n" +
+                    "                    (case  when diaria_encabezado.borrada = 0 then 'NO' when diaria_encabezado.borrada = 1 then 'SI' end) as borrada,\n" +
+                    "                    (case  when diaria_encabezado.anulado = 0 then 'NO' when diaria_encabezado.anulado = 1 then 'SI' end) as anulada,\n" +
+                    "                    (case WHEN RP.fecha_registro_pago IS NOT NULL THEN 'SI' ELSE 'NO' END) AS PAGADA\n" +
+                    "                    from ventasdiarias.venta_encabezado diaria_encabezado\n" +
+                    "                    inner join ventasdiarias.venta_detalle_plus vdp  on\n" +
+                    "                    diaria_encabezado.id =vdp.id_enca\n" +
+                    "                    left join silverpos_hist.registro_pagos rp on \n" +
+                    "                    SUBSTRING_INDEX(rp.no_orden, '-', 1) = diaria_encabezado.num_doc AND \n" +
+                    "                    SUBSTRING_INDEX(rp.no_orden, '-', -1) = diaria_encabezado.no_orden \n" +
+                    "                    group by diaria_encabezado.id,RP.fecha_registro_pago \n" +
+                    "                    order by diaria_encabezado.fechatransaccion  desc";
 
             Conexion con = new Conexion();
             Connection conexionMysql  = con.conectar();

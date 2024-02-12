@@ -10,7 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class FiltrosBusquedas {
+public class    FiltrosBusquedas {
 
     public  void ordenesPorFechas(JTextField fechaInicio, JTextField fechaFinal, JTable tabla, DefaultTableModel  model, Integer anuladas){
 
