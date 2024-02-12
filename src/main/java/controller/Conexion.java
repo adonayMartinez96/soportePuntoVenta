@@ -23,6 +23,7 @@ public class Conexion {
         port = Config.getPortDataBase();
         user = Config.getUserDataBase();
         pass = Config.getPasswordDataBase();
+        ruteFileExcel = Config.getExcelRute();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "-h":
