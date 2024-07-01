@@ -9,3 +9,6 @@ target/
 
 # Ignorar archivo de configuración .env
 .env
+
+#ignorar archivo de aout
+out/

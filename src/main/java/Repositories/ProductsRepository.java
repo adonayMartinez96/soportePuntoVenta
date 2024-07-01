@@ -3,7 +3,7 @@ package Repositories;
 /* import org.apache.commons.text.similarity.LevenshteinDistance; */
 
 import controller.Conexion;
-import decoder.core.ProductMatcher;
+import  Kernel.decoder.ProductMatcher;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

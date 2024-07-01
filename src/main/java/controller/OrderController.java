@@ -12,7 +12,7 @@ import Repositories.ClientesDireccionesDomiciliosRepository;
 import Repositories.OrdersRepository;
 import Repositories.ProductsRepository;
 import Repositories.VentaDetallePlusRepository;
-import decoder.core.Decoder;
+import Kernel.decoder.Decoder;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
 public class OrderController {
@@ -33,6 +33,7 @@ public class OrderController {
     public Integer lastSequeceNumberInsertSale;
 
     public OrderController(int idClient, Decoder data, boolean isNew) {
+        VentaDetallePlusRepository.setDecoderData(data);
         this.idClient = idClient;
         this.data = data;
         this.isNew = isNew;
@@ -168,7 +169,8 @@ public class OrderController {
                 this.data.getAddress().get("address"),
                 this.data.getAddress().get("reference"),
                 this.data.getName(),
-                this.data.getPhone());
+                this.data.getPhone(),
+                this.data.getIdOrderType());
     }
 
     private List<Map<String, Object>> insertSaleProduct() {
@@ -185,7 +187,6 @@ public class OrderController {
     
             if (idProduct != -1) {
                 String productName = ProductsRepository.getProductNameById(idProduct);
-    
                 List<Map<String, Object>> currentData = VentaDetallePlusRepository.insertMultiplesSales(
                         idProduct,
                         this.data.getUnitPrice(),
@@ -226,6 +227,7 @@ public class OrderController {
 
     private List<Map<String, Object>> insertSaleDelivery(){
         if (!this.data.existDelivery()) {
+            System.out.println("No hay envio ping");
             return Collections.emptyList();
         }
     

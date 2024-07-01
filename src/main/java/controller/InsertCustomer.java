@@ -10,17 +10,16 @@ public class InsertCustomer {
 
     public boolean findCustomer(String phoneNumber) {
         boolean find = false;
-    
-        // En esta consulta, busco un cliente por número de teléfono
-        String findCustomer = "SELECT COUNT(telefono) AS contador FROM silverpos.clientes c WHERE c.telefono = ?";
+
+        String findCustomer = "SELECT COUNT(telefono) AS contador FROM silverpos.clientes c WHERE CONVERT(c.telefono USING utf8mb4) = CONVERT(? USING utf8mb4)";
         try {
             Conexion con = new Conexion();
             Connection conexionMysql = con.conectar();
-    
+
             PreparedStatement st = conexionMysql.prepareStatement(findCustomer);
             st.setString(1, phoneNumber);
             ResultSet rs = st.executeQuery();
-    
+
             while (rs.next()) {
                 int exist = rs.getInt("contador");
                 find = (exist > 0);
@@ -31,6 +30,7 @@ public class InsertCustomer {
         }
         return find;
     }
+
     
 
     public int insertCustomer(String name,String numberPhone){

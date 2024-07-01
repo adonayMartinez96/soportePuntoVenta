@@ -1,6 +1,7 @@
 package Repositories;
 
 import controller.Conexion;
+import Kernel.decoder.Decoder;
 import Kernel.Respository.CustomPreparedStatement;
 import Kernel.Respository.Insert;
 import Kernel.utils.Extractor;
@@ -50,7 +51,7 @@ import java.util.Map;
  */
 
 public class VentaDetallePlusRepository {
-
+    public static Decoder decoder;
     // En tu clase principal o donde estés realizando la inserción de ventas:
 
     public static Map<String, Object> insertOneSale(int idProduct, int sequence, double unitPrice,
@@ -65,7 +66,7 @@ public class VentaDetallePlusRepository {
             insert.setColumn("idh", 0);
             insert.setColumn("id_plu", idProduct, true);
             insert.setColumn("cantidad", 1.0); // esto creo que tambien hay que modificarlo x
-            insert.setColumn("precio", unitPrice, true);
+            insert.setColumn("precio", calcUnitPrice(unitPrice) , true);
             insert.setColumn("descuento", 0.0000);
             insert.setColumn("id_umedida", "1");
             insert.setColumn("horatransaccion", dateOrderInsert, true);
@@ -101,7 +102,7 @@ public class VentaDetallePlusRepository {
             insert.setColumn("untaxable", 0);
             insert.setColumn("descripcion2", "");
             insert.setColumn("identificador", "G");
-            insert.setColumn("precioinicial", unitPrice, true);
+            insert.setColumn("precioinicial",  calcUnitPrice(unitPrice), true);
             insert.setColumn("erp", 0);
             insert.setColumn("monitor", 0.0);
             insert.setColumn("comision", 0);
@@ -394,5 +395,32 @@ public class VentaDetallePlusRepository {
 
         return price;
     }
+    
 
+    public static Double priceDelivery(Integer idDelivery){
+        if(idDelivery == -1){
+            System.out.println("En efecto, no hay envio, pong");
+            return 0.0;
+        }
+        return Double.parseDouble(getPriceDeliveryById(idDelivery));
+    }
+
+    public static Double calcUnitPrice(Double unitPrice) {
+        System.out.println("El id es: ");
+        System.out.println(decoder.getDelivery());
+        Double deliveryPrice = priceDelivery(decoder.getIdDelivery());
+        int amountProducts = decoder.getAmountProducts();
+    
+        if (amountProducts <= 0) {
+            return unitPrice;
+        }
+    
+        return unitPrice - (deliveryPrice != 0.0 ? deliveryPrice : 0.0) / amountProducts;
+    }
+    
+
+
+    public static void setDecoderData(Decoder decoder){
+        VentaDetallePlusRepository.decoder = decoder;
+    }
 }

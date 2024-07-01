@@ -11,10 +11,11 @@ import java.util.Map;
 
 import Kernel.Respository.CustomPreparedStatement;
 import Kernel.Respository.Insert;
+import Kernel.Respository.Select;
 
 public class OrdersRepository {
 
-    public static Map<String, Object> insertOrder(String address, String reference, String nameClient, String phone) {
+    public static Map<String, Object> insertOrder(String address, String reference, String nameClient, String phone, Integer idOrderType) {
         Map<String, Object> result = new HashMap<>();
         Integer lastInsertedId = 0;
 
@@ -31,7 +32,7 @@ public class OrdersRepository {
             insert.setColumn("idcajero", "3");
             insert.setColumn("tipo_propina", "1");
             insert.setColumn("valor_propina", "0,00");
-            insert.setColumn("id_Ordertype", "1");
+            insert.setColumn("id_Ordertype", idOrderType, true); // es el tipo de orden
             insert.setColumn("precuentas_prints", "0");
             insert.setColumn("Cliente_temporal", "");
             insert.setColumn("idcliente", 1);
@@ -60,7 +61,7 @@ public class OrdersRepository {
             insert.setColumn("num_fac_electronica", "");
             insert.setColumn("firma64", "");
             insert.setColumn("idmotorista", 0);
-            insert.setColumn("direccion_domicilio", address, true);
+            insert.setColumn("direccion_domicilio", verifysMaxLen(address, "direccion_domicilio"), true);
             insert.setColumn("referencia_domicilio", reference, true);
             insert.setColumn("cliente_domicilio", nameClient, true);
             insert.setColumn("liquidada_motorista", 0);
@@ -150,6 +151,12 @@ public class OrdersRepository {
     }
 
 
+    public static String verifysMaxLen(String input, String column) {
+        int maxColumnLength = Select.selectMaxColumnLength("ventasdiarias", "venta_encabezado", column);
+        return (maxColumnLength > 0 && input.length() > maxColumnLength) 
+            ? input.substring(0, maxColumnLength) 
+            : input;
+    }
     
 
 }
